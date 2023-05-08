@@ -1,0 +1,4 @@
+serviceTest\TagGiftServiceImplTest.class
+config\H2Config.class
+serviceTest\GiftCertificateServiceImplTest.class
+serviceTest\TagServiceImplTest.class

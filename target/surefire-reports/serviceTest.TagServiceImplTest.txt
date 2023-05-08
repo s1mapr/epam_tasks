@@ -1,0 +1,24 @@
+-------------------------------------------------------------------------------
+Test set: serviceTest.TagServiceImplTest
+-------------------------------------------------------------------------------
+Tests run: 5, Failures: 5, Errors: 0, Skipped: 0, Time elapsed: 0.002 sec <<< FAILURE!
+serviceTest.TagServiceImplTest.testGetTagsByCertificateId()  Time elapsed: 0.002 sec  <<< FAILURE!
+java.lang.NullPointerException
+	at serviceTest.TagServiceImplTest.testGetTagsByCertificateId(TagServiceImplTest.java:84)
+
+serviceTest.TagServiceImplTest.testDeleteTagById()  Time elapsed: 0 sec  <<< FAILURE!
+java.lang.NullPointerException
+	at serviceTest.TagServiceImplTest.testDeleteTagById(TagServiceImplTest.java:67)
+
+serviceTest.TagServiceImplTest.testGetTagByName()  Time elapsed: 0 sec  <<< FAILURE!
+java.lang.NullPointerException
+	at serviceTest.TagServiceImplTest.testGetTagByName(TagServiceImplTest.java:76)
+
+serviceTest.TagServiceImplTest.testCreateTag()  Time elapsed: 0 sec  <<< FAILURE!
+java.lang.NullPointerException
+	at serviceTest.TagServiceImplTest.testCreateTag(TagServiceImplTest.java:58)
+
+serviceTest.TagServiceImplTest.testGetTagById()  Time elapsed: 0 sec  <<< FAILURE!
+java.lang.NullPointerException
+	at serviceTest.TagServiceImplTest.testGetTagById(TagServiceImplTest.java:93)
+
