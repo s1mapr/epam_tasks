@@ -1,44 +1,69 @@
 package com.epam.esm.dao.postgresql.impl;
 
 import com.epam.esm.dao.TagGiftDAO;
+import com.epam.esm.entity.GiftCertificate;
+import com.epam.esm.entity.Tag;
 import com.epam.esm.entity.TagGift;
+import com.epam.esm.exeptions.BadRequestException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.hibernate.Session;
+import org.hibernate.query.Query;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import javax.persistence.EntityManager;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
 public class PostgreSQLTagGiftDAO implements TagGiftDAO {
 
-    private final JdbcTemplate jdbcTemplate;
+    private EntityManager entityManager;
 
-    private final String ADD_ENTRY = "INSERT INTO certificate_tag VALUES (?,?)";
-
-    private final String DELETE_ENTRY_BY_TAG_ID = "DELETE FROM certificate_tag WHERE tag_id = ?";
-    private final String DELETE_ENTRY_BY_CERTIFICATE_ID = "DELETE FROM certificate_tag WHERE certificate_id = ?";
-    private final String GET_ENTRY_BY_TAG_ID_AND_CERTIFICATE_ID = "SELECT * FROM certificate_tag WHERE certificate_id = ? AND tag_id = ?";
+    @Autowired
+    public void setEntityManager(EntityManager entityManager) {
+        this.entityManager = entityManager;
+    }
 
     @Override
-    public void addEntry(int tagId, int certificateId) {
-        if(getEntry(certificateId, tagId).isEmpty()) {
-            jdbcTemplate.update(ADD_ENTRY, certificateId, tagId);
-        }
+    public void addEntry(Tag tag, GiftCertificate giftCertificate) {
+        Session currentSession = entityManager.unwrap(Session.class);
+        TagGift tagGift = new TagGift(giftCertificate, tag);
+        currentSession.saveOrUpdate(tagGift);
     }
 
     @Override
     public void deleteEntryByTagId(int tagId){
-        jdbcTemplate.update(DELETE_ENTRY_BY_TAG_ID, tagId);
+        Session currentSession = entityManager.unwrap(Session.class);
+        Query<TagGift> deleteQuery = currentSession.createQuery("DELETE FROM TagGift tg WHERE tg.tag.id = :tagId");
+        deleteQuery.setParameter("tagId", tagId);
+        deleteQuery.executeUpdate();
     }
 
     @Override
-    public void deleteEntryByCertificateId(int certificateId){
-        jdbcTemplate.update(DELETE_ENTRY_BY_CERTIFICATE_ID, certificateId);
+    public void deleteEntryByCertificateId(int giftCertificateId){
+        Session currentSession = entityManager.unwrap(Session.class);
+        Query<TagGift> deleteQuery = currentSession.createQuery("DELETE FROM TagGift tg WHERE tg.giftCertificate.id = :giftCertificateId");
+        deleteQuery.setParameter("giftCertificateId", giftCertificateId);
+        deleteQuery.executeUpdate();
     }
 
-    private Optional<TagGift> getEntry(int certificateId, int tagId){
-        return jdbcTemplate.query(GET_ENTRY_BY_TAG_ID_AND_CERTIFICATE_ID,new BeanPropertyRowMapper<>(TagGift.class), certificateId, tagId).stream().findAny();
+//    private Optional<TagGift> getEntry(int certificateId, int tagId){
+//        return jdbcTemplate.query(GET_ENTRY_BY_TAG_ID_AND_CERTIFICATE_ID,new BeanPropertyRowMapper<>(TagGift.class), certificateId, tagId).stream().findAny();
+//    }
+
+
+
+
+    @Override
+    public List<GiftCertificate> getGiftCertificatesByTagId(int id) {
+        Session currentSession = entityManager.unwrap(Session.class);
+        Optional<Tag> tag = Optional.ofNullable(currentSession.load(Tag.class, id));
+        List<TagGift> tagGifts = tag.orElseThrow(()->new BadRequestException("There are no certificates that have tag with id " + id)).getGiftCertificateTags();
+        return tagGifts.stream()
+                .map(TagGift::getGiftCertificate)
+                .collect(Collectors.toList());
     }
 }

@@ -2,9 +2,12 @@ package com.epam.esm.util;
 
 import com.epam.esm.dto.GiftCertificateDTO;
 import com.epam.esm.dto.SearchParams;
+import com.epam.esm.dto.TagDTO;
+import com.epam.esm.exeptions.BadRequestException;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -18,7 +21,7 @@ public class SearchFilter {
     private SearchParams searchParams;
 
     public List<GiftCertificateDTO> doFilter() {
-        filterByTagName(searchParams.getTagName());
+        filterByTagNames(searchParams.getTagName());
         filterByPartOfName(searchParams.getName());
         filterByPartOfDescription(searchParams.getDescription());
         if(searchParams.isSortByDate() && searchParams.isSortByName()){
@@ -27,15 +30,16 @@ public class SearchFilter {
             sortByDate(searchParams.getSortType());
             sortByName(searchParams.getSortType());
         }
+        doPagination(searchParams.getPage());
         return certificates;
     }
 
-    private void filterByTagName(String tagName) {
-        if (Objects.nonNull(tagName)) {
+    private void filterByTagNames(List<TagDTO> tagNames) {
+        if (Objects.nonNull(tagNames) && !tagNames.isEmpty()) {
             certificates = certificates.stream()
-                    .filter(certificate -> certificate.getTags()
-                            .stream()
-                            .anyMatch(tag -> tag.getName().equals(tagName)))
+                    .filter(giftCertificate -> tagNames.stream()
+                            .allMatch(tagDTO -> giftCertificate.getTags().stream()
+                                    .anyMatch(tag -> tag.getName().equals(tagDTO.getName()))))
                     .collect(Collectors.toList());
         }
     }
@@ -97,6 +101,19 @@ public class SearchFilter {
                                 .thenComparing(GiftCertificateDTO::getLastUpdateDate, Comparator.reverseOrder()))
                         .collect(Collectors.toList());
             }
+        }
+    }
+
+    private void doPagination(Integer page){
+        int pageSize = 10;
+        if(Objects.nonNull(page)){
+            if (page <= 0 || page > Math.ceil((double) certificates.size() /10)) {
+                throw new BadRequestException("page " + page + " are not available");
+            }
+            certificates = certificates.stream()
+                    .skip((long) (page - 1) *pageSize)
+                    .limit(pageSize)
+                    .collect(Collectors.toList());
         }
     }
 

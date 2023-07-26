@@ -1,6 +1,7 @@
 package com.epam.esm.service.impl;
 
 import com.epam.esm.dao.TagDAO;
+import com.epam.esm.dto.TagDTO;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.exeptions.BadRequestException;
 import com.epam.esm.service.TagService;
@@ -10,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -17,31 +19,44 @@ public class TagServiceImpl implements TagService {
 
     private final TagDAO tagDAO;
 
-    public List<Tag> getAllTags(){
-        return tagDAO.getAllTags();
+    public List<TagDTO> getAllTagsWithPagination(Integer page) {
+        return tagDAO.getAllTagsWithPagination(page).stream()
+                .map(TagDTO::createDTO)
+                .collect(Collectors.toList());
     }
 
     @Transactional
-    public void createTag(String name){
-        tagDAO.createTag(name);
+    public void createTag(String name) {
+        Tag tag = Tag.builder()
+                .name(name)
+                .build();
+        tagDAO.createTag(tag);
     }
 
     @Transactional
-    public void deleteTagById(int id){
+    public void deleteTagById(int id) {
         tagDAO.deleteTagById(id);
     }
 
-    public Optional<Tag> getTagByName(String name){
+    public Optional<Tag> getOptionalTagByName(String name) {
+
         return tagDAO.getTagByName(name);
     }
 
-    public List<Tag> getTagsByCertificateId(int id){
-        return tagDAO.getTagsByCertificateId(id);
+
+    public TagDTO getTagByName(String name) {
+        Tag tag = tagDAO.getTagByName(name).orElseThrow(()->new BadRequestException("No tag with same name"));
+        return TagDTO.createDTO(tag);
     }
+
+
+
+
 
     @Override
     public Tag getTagById(int id) {
-        return tagDAO.getTagById(id).orElseThrow(()->new BadRequestException("Tag with id " + id + " not found"));
+        return tagDAO.getTagById(id).orElseThrow(() -> new BadRequestException("Tag with id " + id + " not found"));
     }
+
 
 }

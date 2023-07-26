@@ -1,9 +1,9 @@
 package com.epam.esm.dto;
 
-import com.epam.esm.dao.GiftCertificateDAO;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
 import lombok.*;
+import org.springframework.hateoas.RepresentationModel;
 
 import java.util.List;
 
@@ -12,7 +12,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class GiftCertificateDTO {
+public class GiftCertificateDTO extends RepresentationModel<GiftCertificateDTO> {
     private int id;
     private String name;
     private String description;
@@ -20,7 +20,7 @@ public class GiftCertificateDTO {
     private int duration;
     private String createDate;
     private String lastUpdateDate;
-    private List<Tag> tags;
+    private List<TagDTO> tags;
 
     public static GiftCertificate extractGiftCertificateFromDTO(GiftCertificateDTO giftCertificateDTO){
         return GiftCertificate.builder()

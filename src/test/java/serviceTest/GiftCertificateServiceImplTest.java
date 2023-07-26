@@ -1,15 +1,18 @@
 package serviceTest;
 
+import com.epam.esm.config.SpringConfig;
 import com.epam.esm.entity.GiftCertificate;
+import com.epam.esm.entity.TagGift;
 import com.epam.esm.exeptions.BadRequestException;
 import com.epam.esm.service.GiftCertificateService;
-import config.H2Config;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,8 +25,8 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = H2Config.class)
+@SpringBootTest(classes = SpringConfig.class)
+@ActiveProfiles("test")
 @Transactional
 class GiftCertificateServiceImplTest {
 
@@ -75,7 +78,6 @@ class GiftCertificateServiceImplTest {
                 .build();
         Integer id = giftCertificateService.createGiftCertificate(giftCertificate);
         assertNotNull(id);
-
         GiftCertificate foundGiftCertificate = giftCertificateService.getGiftCertificateById(id);
         assertNotNull(foundGiftCertificate);
         assertEquals(foundGiftCertificate.getId(), id);

@@ -10,6 +10,7 @@ public interface GiftCertificateDAO {
     int createGiftCertificate(GiftCertificate giftCertificate);
 
     List<GiftCertificate> getAllGiftCertificates();
+    List<GiftCertificate> getAllGiftCertificatesWithPagination(Integer page);
 
     void updateGiftCertificate(GiftCertificate giftCertificate);
 
@@ -17,6 +18,6 @@ public interface GiftCertificateDAO {
 
     Optional<GiftCertificate> getGiftCertificateById(int id);
 
-    List<GiftCertificate> getGiftCertificatesByTagId(int id);
+
 
 }

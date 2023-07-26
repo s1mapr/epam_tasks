@@ -2,60 +2,77 @@ package com.epam.esm.dao.postgresql.impl;
 
 import com.epam.esm.dao.TagDAO;
 import com.epam.esm.entity.Tag;
+import com.epam.esm.exeptions.BadRequestException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.hibernate.Session;
+import org.hibernate.query.Query;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
 public class PostgreSQLTagDAO implements TagDAO {
 
-    private final JdbcTemplate jdbcTemplate;
-    private final String SELECT_ALL_TAGS = "SELECT * FROM tag";
-    private final String INSERT_TAG = "INSERT INTO tag(name) VALUES (?)";
-    private final String DELETE_TAG = "DELETE FROM tag WHERE id=?";
-    private final String selectTagByName = "SELECT * FROM tag WHERE name = ?";
-    private final String selectTagsByCertificateId = "SELECT t.*\n" +
-            "FROM tag t\n" +
-            "JOIN certificate_tag ct ON t.id = ct.tag_id\n" +
-            "WHERE ct.certificate_id = ?";
-    private final String SELECT_TAG_BY_ID = "SELECT * FROM tag WHERE id = ?";
+    private EntityManager entityManager;
 
+    private static final int LIMIT_FOR_PAGINATION = 10;
+
+    @Autowired
+    public void setEntityManager(EntityManager entityManager) {
+        this.entityManager = entityManager;
+    }
 
     @Override
-    public List<Tag> getAllTags(){
-        return jdbcTemplate.query(SELECT_ALL_TAGS, new BeanPropertyRowMapper<>(Tag.class));
+    public List<Tag> getAllTagsWithPagination(Integer page) {
+        Session currentSession = entityManager.unwrap(Session.class);
+        TypedQuery<Tag> query = currentSession.createQuery("from Tag", Tag.class);
+        if (Objects.nonNull(page)) {
+            if (page <= 0 || page > Math.ceil((double) query.getResultList().size() /10)) {
+                throw new BadRequestException("page " + page + " are not available");
+            }
+            query.setFirstResult(LIMIT_FOR_PAGINATION * (page-1));
+            query.setMaxResults(LIMIT_FOR_PAGINATION);
+        }
+        return query.getResultList();
+
     }
 
     @Override
     public Optional<Tag> getTagByName(String name) {
-        return jdbcTemplate.query(selectTagByName, new BeanPropertyRowMapper<>(Tag.class), name).stream().findAny();
+        Session currentSession = entityManager.unwrap(Session.class);
+        Query<Tag> query = currentSession.createQuery("FROM Tag WHERE name = :tagName", Tag.class);
+        query.setParameter("tagName", name);
+        Tag tag = query.uniqueResult();
+        return Optional.ofNullable(tag);
     }
 
     @Override
-    public void createTag(String name){
-        jdbcTemplate.update(INSERT_TAG, name);
+    public void createTag(Tag tag) {
+        Session currentSession = entityManager.unwrap(Session.class);
+        currentSession.save(tag);
     }
 
     @Override
-    public void deleteTagById(int id){
-        jdbcTemplate.update(DELETE_TAG, id);
-    }
-
-
-    @Override
-    public List<Tag> getTagsByCertificateId(int id) {
-        return jdbcTemplate.query(selectTagsByCertificateId, new BeanPropertyRowMapper<>(Tag.class), id);
+    public void deleteTagById(int id) {
+        Session currentSession = entityManager.unwrap(Session.class);
+        Tag tag = getTagById(id).orElseThrow(() -> new BadRequestException("Tag with id " + id + " doesn't exist"));
+        currentSession.delete(tag);
     }
 
 
     @Override
     public Optional<Tag> getTagById(int id) {
-        return jdbcTemplate.query(SELECT_TAG_BY_ID, new BeanPropertyRowMapper<>(Tag.class), id).stream().findAny();
+        Session currentSession = entityManager.unwrap(Session.class);
+        Tag tag = currentSession.get(Tag.class, id);
+        if (tag == null) {
+            throw new BadRequestException("Tag with id " + id + " doesn't exist");
+        }
+        return Optional.of(tag);
     }
 
 }

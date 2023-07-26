@@ -2,75 +2,97 @@ package com.epam.esm.dao.mysql.impl;
 
 import com.epam.esm.dao.GiftCertificateDAO;
 import com.epam.esm.entity.GiftCertificate;
+import com.epam.esm.entity.Tag;
+import com.epam.esm.entity.User;
+import com.epam.esm.exeptions.BadRequestException;
 import com.epam.esm.util.ISO8601TimeFormatter;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.Session;
+import org.hibernate.proxy.HibernateProxy;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
+import javax.persistence.Access;
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
 import java.sql.PreparedStatement;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
 public class MySQLGiftCertificateDAO implements GiftCertificateDAO {
 
-    private final JdbcTemplate jdbcTemplate;
-    private final String INSERT_GIFT_CERTIFICATE = "INSERT INTO gift_certificate(name, description, price, duration, create_date, last_update_date) VALUES (?,?,?,?,?,?)";
-    private final String SELECT_ALL_GIFT_CERTIFICATES = "SELECT * FROM gift_certificate";
-    private final String DELETE_GIFT_CERTIFICATE_BY_ID = "DELETE FROM gift_certificate WHERE id=?";
-    private final String UPDATE_GIFT_CERTIFICATE = "UPDATE gift_certificate SET name = ?, description = ?, price = ?, duration = ?, last_update_date = ? WHERE id = ?";
-    private final String SELECT_GIFT_CERTIFICATE_BY_ID = "SELECT * FROM gift_certificate WHERE id = ?";
-    private final String SELECT_GIFT_CERTIFICATE_BY_TAG_ID = "SELECT gc.*\n" +
-            "FROM gift_certificate gc\n" +
-            "JOIN certificate_tag ct ON gc.id = ct.certificate_id\n" +
-            "WHERE ct.tag_id = ?";
+    private EntityManager entityManager;
+
+    private static final int LIMIT_FOR_PAGINATION = 10;
+
+    @Autowired
+    public void setEntityManager(EntityManager entityManager) {
+        this.entityManager = entityManager;
+    }
 
     @Override
     public int createGiftCertificate(GiftCertificate giftCertificate) {
-        KeyHolder keyHolder = new GeneratedKeyHolder();
+        Session currentSession = entityManager.unwrap(Session.class);
         String date = ISO8601TimeFormatter.getFormattedDate(new Date());
-
-        jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(INSERT_GIFT_CERTIFICATE, new String[]{"id"});
-            ps.setString(1, giftCertificate.getName());
-            ps.setString(2, giftCertificate.getDescription());
-            ps.setDouble(3, giftCertificate.getPrice());
-            ps.setInt(4, giftCertificate.getDuration());
-            ps.setString(5, date);
-            ps.setString(6, date);
-            return ps;
-        }, keyHolder);
-
-        return keyHolder.getKey().intValue();
+        giftCertificate.setCreateDate(date);
+        giftCertificate.setLastUpdateDate(date);
+        currentSession.save(giftCertificate);
+        return giftCertificate.getId();
     }
 
     @Override
     public List<GiftCertificate> getAllGiftCertificates() {
-        return jdbcTemplate.query(SELECT_ALL_GIFT_CERTIFICATES, new BeanPropertyRowMapper<>(GiftCertificate.class));
+        Session currentSession = entityManager.unwrap(Session.class);
+        return currentSession.createQuery("from GiftCertificate", GiftCertificate.class).getResultList();
+    }
+
+    @Override
+    public List<GiftCertificate> getAllGiftCertificatesWithPagination(Integer page) {
+        Session currentSession = entityManager.unwrap(Session.class);
+        TypedQuery<GiftCertificate> query = currentSession.createQuery("from GiftCertificate", GiftCertificate.class);
+        if (Objects.nonNull(page)) {
+            if (page <= 0 || page > Math.ceil((double) query.getResultList().size() /10)) {
+                throw new BadRequestException("page " + page + " are not available");
+            }
+            query.setFirstResult(LIMIT_FOR_PAGINATION * (page-1));
+            query.setMaxResults(LIMIT_FOR_PAGINATION);
+        }
+        return query.getResultList();
     }
 
     @Override
     public void updateGiftCertificate(GiftCertificate giftCertificate) {
-        jdbcTemplate.update(UPDATE_GIFT_CERTIFICATE, giftCertificate.getName(), giftCertificate.getDescription(), giftCertificate.getPrice(), giftCertificate.getDuration(), ISO8601TimeFormatter.getFormattedDate(new Date()), giftCertificate.getId());
+        Session currentSession = entityManager.unwrap(Session.class);
+        if (!currentSession.contains(giftCertificate)) {
+            giftCertificate = (GiftCertificate) currentSession.merge(giftCertificate);
+        }
+        currentSession.update(giftCertificate);
     }
 
     @Override
     public void deleteGiftCertificate(int id) {
-        jdbcTemplate.update(DELETE_GIFT_CERTIFICATE_BY_ID, id);
+        Session currentSession = entityManager.unwrap(Session.class);
+        GiftCertificate giftCertificate = getGiftCertificateById(id).orElseThrow(() -> new BadRequestException("Gift certificate with id " + id + " doesn't exist"));
+        currentSession.delete(giftCertificate);
     }
 
     @Override
     public Optional<GiftCertificate> getGiftCertificateById(int id) {
-        return jdbcTemplate.query(SELECT_GIFT_CERTIFICATE_BY_ID, new BeanPropertyRowMapper<>(GiftCertificate.class), id).stream().findAny();
+        Session currentSession = entityManager.unwrap(Session.class);
+        GiftCertificate giftCertificate = currentSession.get(GiftCertificate.class, id);
+        if (giftCertificate == null) {
+            throw new BadRequestException("Certificate with id " + id + " doesn't exist");
+        }
+        return Optional.of(giftCertificate);
     }
 
-    @Override
-    public List<GiftCertificate> getGiftCertificatesByTagId(int id) {
-        return jdbcTemplate.query(SELECT_GIFT_CERTIFICATE_BY_TAG_ID, new BeanPropertyRowMapper<>(GiftCertificate.class), id);
-    }
+
 }

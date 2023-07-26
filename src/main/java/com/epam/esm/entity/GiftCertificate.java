@@ -1,20 +1,46 @@
 package com.epam.esm.entity;
 
+import com.epam.esm.util.auditors.GiftCertificateAuditor;
+import com.epam.esm.util.auditors.UserAuditor;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
 
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+
+@EntityListeners(GiftCertificateAuditor.class)
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Entity
+@Table
 public class GiftCertificate {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name="id", unique = true, nullable = false)
     private int id;
+    @Column
     private String name;
+    @Column
     private String description;
+    @Column
     private double price;
+    @Column
     private int duration;
+    @Column
     private String createDate;
+    @Column
     private String lastUpdateDate;
+
+    @OneToMany(mappedBy = "giftCertificate")
+    private List<TagGift> giftCertificateTags = new ArrayList<>();
+
+    @OneToMany(mappedBy = "giftCertificate")
+    private List<Order> orders = new ArrayList<>();
 
     public static GiftCertificate builderForUpdatingData(GiftCertificate newGiftCertificate, GiftCertificate oldGiftCertificate){
         return GiftCertificate.builder()

@@ -2,15 +2,23 @@ package com.epam.esm.controller;
 
 import com.epam.esm.dto.GiftCertificateDTO;
 import com.epam.esm.dto.MessageDTO;
+import com.epam.esm.dto.TagDTO;
 import com.epam.esm.service.impl.TagGiftServiceImpl;
 import com.epam.esm.dto.SearchParams;
+import com.epam.esm.service.impl.TagServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 
 @RestController
@@ -19,7 +27,7 @@ import java.util.List;
 public class GiftCertificateController {
 
     private final TagGiftServiceImpl tagGiftServiceImpl;
-
+    private final TagServiceImpl tagService;
 
     /**
      * Method for getting all gift certificates
@@ -28,8 +36,13 @@ public class GiftCertificateController {
      * @return list of all gift certificates in JSON format
      */
     @GetMapping
-    public ResponseEntity<List<GiftCertificateDTO>> getAllGiftCertificates() {
-        return new ResponseEntity<>(tagGiftServiceImpl.getAllGiftCertificateDTO(), HttpStatus.OK);
+    public ResponseEntity<List<GiftCertificateDTO>> getAllGiftCertificates(@RequestParam(value = "p", required = false) Integer page) {
+        List<GiftCertificateDTO> certificates = tagGiftServiceImpl.getAllGiftCertificateDTOWithPagination(page);
+        for (GiftCertificateDTO certificate : certificates) {
+            certificate.add(linkTo(methodOn(GiftCertificateController.class).getCertificateById(certificate.getId())).withRel("certificate"));
+            certificate.getTags().stream().map(x -> x.add(linkTo(methodOn(TagController.class).getTagById(x.getId())).withRel("tag"))).collect(Collectors.toList());
+        }
+        return new ResponseEntity<>(certificates, HttpStatus.OK);
     }
 
     /**
@@ -82,7 +95,7 @@ public class GiftCertificateController {
      * Method for getting list of gift certificates sorted and filtered by request params
      * If there are no any gift certificates with such parameters, empty list will be returned
      *
-     * @param tagName      tag name of certificates to search
+     * @param tagNames     list of tag names of certificates to search
      * @param name         part of certificate name to search
      * @param description  part of certificate description to search
      * @param isSortByDate shows if user want to sort certificates by date
@@ -91,20 +104,33 @@ public class GiftCertificateController {
      * @return list of gift certificates in JSON format
      */
     @GetMapping("/search")
-    public ResponseEntity<List<GiftCertificateDTO>> getCertificatesByTagName(@RequestParam(value = "tagName", required = false) String tagName,
-                                                                             @RequestParam(value = "name", required = false) String name,
-                                                                             @RequestParam(value = "description", required = false) String description,
-                                                                             @RequestParam(value = "isSortByDate", required = false) boolean isSortByDate,
-                                                                             @RequestParam(value = "isSortByName", required = false) boolean isSortByName,
-                                                                             @RequestParam(value = "sortType", required = false) String sortType) {
-        return new ResponseEntity<>(tagGiftServiceImpl.getCertificatesBySearchParams(SearchParams.builder()
-                .tagName(tagName)
+    public ResponseEntity<List<GiftCertificateDTO>> getCertificatesByFilterParams(@RequestParam(value = "tagName", required = false) List<String> tagNames,
+                                                                                  @RequestParam(value = "name", required = false) String name,
+                                                                                  @RequestParam(value = "description", required = false) String description,
+                                                                                  @RequestParam(value = "isSortByDate", required = false) boolean isSortByDate,
+                                                                                  @RequestParam(value = "isSortByName", required = false) boolean isSortByName,
+                                                                                  @RequestParam(value = "sortType", required = false) String sortType,
+                                                                                  @RequestParam(value = "p", required = false) Integer page) {
+        List<TagDTO> tags = new ArrayList<>();
+        if (Objects.nonNull(tagNames)) {
+            tags = tagNames.stream().map(tagService::getTagByName).collect(Collectors.toList());
+        }
+        List<GiftCertificateDTO> certificates = tagGiftServiceImpl.getCertificatesBySearchParams(SearchParams.builder()
+                .tagName(tags)
                 .name(name)
                 .description(description)
                 .isSortByDate(isSortByDate)
                 .isSortByName(isSortByName)
                 .sortType(sortType)
-                .build()), HttpStatus.OK);
+                .page(page)
+                .build());
+        for (GiftCertificateDTO certificate : certificates) {
+            certificate.add(linkTo(methodOn(GiftCertificateController.class).getCertificateById(certificate.getId())).withRel("certificate"));
+            if (Objects.nonNull(certificate.getTags())) {
+                certificate.getTags().stream().map(x -> x.add(linkTo(methodOn(TagController.class).getTagById(x.getId())).withRel("tag"))).collect(Collectors.toList());
+            }
+        }
+        return new ResponseEntity<>(certificates, HttpStatus.OK);
     }
 
     /**
@@ -115,7 +141,13 @@ public class GiftCertificateController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<GiftCertificateDTO> getCertificateById(@PathVariable("id") int id) {
-        return new ResponseEntity<>(tagGiftServiceImpl.getCertificateDTOById(id), HttpStatus.OK);
+        GiftCertificateDTO giftCertificateDTO = tagGiftServiceImpl.getCertificateDTOById(id);
+        giftCertificateDTO.add(linkTo(methodOn(GiftCertificateController.class).getAllGiftCertificates(1)).withRel("certificates"));
+        giftCertificateDTO.add(linkTo(methodOn(GiftCertificateController.class).getCertificateById(giftCertificateDTO.getId())).withSelfRel());
+        if (Objects.nonNull(giftCertificateDTO.getTags())) {
+            giftCertificateDTO.getTags().stream().map(x -> x.add(linkTo(methodOn(TagController.class).getTagById(x.getId())).withRel("tag"))).collect(Collectors.toList());
+        }
+        return new ResponseEntity<>(giftCertificateDTO, HttpStatus.OK);
     }
 
 }

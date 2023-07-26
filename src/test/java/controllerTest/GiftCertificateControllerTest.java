@@ -7,7 +7,6 @@ import com.epam.esm.service.impl.GiftCertificateServiceImpl;
 import com.epam.esm.service.impl.TagGiftServiceImpl;
 import com.epam.esm.dto.SearchParams;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import config.H2Config;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,15 +32,11 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
-@ContextConfiguration(classes = {H2Config.class})
 public class GiftCertificateControllerTest {
     private MockMvc mockMvc;
 
     @InjectMocks
     private GiftCertificateController giftCertificateController;
-
-    @Mock
-    private GiftCertificateServiceImpl giftCertificateService;
 
     @Mock
     private TagGiftServiceImpl tagGiftService;

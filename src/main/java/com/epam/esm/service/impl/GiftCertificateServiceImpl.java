@@ -25,6 +25,10 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
         return giftCertificateDAO.getAllGiftCertificates();
     }
 
+    @Override
+    public List<GiftCertificate> getAllGiftCertificatesWithPagination(Integer page) {
+        return giftCertificateDAO.getAllGiftCertificatesWithPagination(page);
+    }
 
 
     public GiftCertificate getGiftCertificateById(int id) {

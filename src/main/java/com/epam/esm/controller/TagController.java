@@ -1,7 +1,13 @@
 package com.epam.esm.controller;
 
 import com.epam.esm.dto.MessageDTO;
+import com.epam.esm.dto.TagDTO;
+import com.epam.esm.dto.UserDTO;
+import com.epam.esm.entity.Order;
 import com.epam.esm.entity.Tag;
+import com.epam.esm.entity.User;
+import com.epam.esm.service.OrderService;
+import com.epam.esm.service.UserService;
 import com.epam.esm.service.impl.TagGiftServiceImpl;
 import com.epam.esm.service.impl.TagServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +17,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequiredArgsConstructor
@@ -21,6 +31,9 @@ public class TagController {
 
     private final TagGiftServiceImpl tagGiftService;
 
+    private final UserService userService;
+
+    private final OrderService orderService;
     /**
      * Method for creating tag
      * tagRequestDTO contains name, description, price, duration, create date and last update date
@@ -40,8 +53,12 @@ public class TagController {
      * @return all tags in JSON format
      */
     @GetMapping
-    public ResponseEntity<List<Tag>> getAllTags() {
-        return new ResponseEntity<>(tagServiceImpl.getAllTags(), HttpStatus.OK);
+    public ResponseEntity<List<TagDTO>> getAllTags(@RequestParam(value = "p", required = false) Integer page) {
+        List<TagDTO> tags = tagServiceImpl.getAllTagsWithPagination(page);
+            for (TagDTO tag : tags) {
+                tag.add(linkTo(methodOn(TagController.class).getTagById(tag.getId())).withRel("tag"));
+            }
+        return new ResponseEntity<>(tags, HttpStatus.OK);
     }
 
     /**
@@ -66,8 +83,23 @@ public class TagController {
      * @return tag in JSON format
      */
     @GetMapping("/{id}")
-    public ResponseEntity<Tag> getTagById(@PathVariable("id") int id) {
-        return new ResponseEntity<>(tagServiceImpl.getTagById(id), HttpStatus.OK);
+    public ResponseEntity<TagDTO> getTagById(@PathVariable("id") int id) {
+        TagDTO tag = tagGiftService.getTagDTOById(id);
+        tag.add(linkTo(methodOn(TagController.class).getTagById(tag.getId())).withSelfRel());
+        tag.add(linkTo(methodOn(TagController.class).getAllTags(1)).withRel("tags"));
+        tag.add(linkTo(methodOn(TagController.class).getMostWildlyUsedTagOfUserWithHighestCostOfAllOrders()).withRel("mostWildlyUsedTag"));
+        return new ResponseEntity<>(tag, HttpStatus.OK);
+    }
+
+    @GetMapping("/mostWildlyUsedTag")
+    public ResponseEntity<TagDTO> getMostWildlyUsedTagOfUserWithHighestCostOfAllOrders(){
+        User user = userService.getUserWithHighestCostOfAllOrders();
+        List<Order> orders = orderService.getAllUserOrders(user);
+        TagDTO mostWildlyUsedTag = tagGiftService.getMostUsedTag(orders);
+        mostWildlyUsedTag.add(linkTo(methodOn(TagController.class).getMostWildlyUsedTagOfUserWithHighestCostOfAllOrders()).withSelfRel());
+        mostWildlyUsedTag.add(linkTo(methodOn(TagController.class).getAllTags(1)).withRel("tags"));
+        mostWildlyUsedTag.add(linkTo(methodOn(TagController.class).getTagById(mostWildlyUsedTag.getId())).withRel("tag"));
+        return new ResponseEntity<>(mostWildlyUsedTag, HttpStatus.OK);
     }
 
 }

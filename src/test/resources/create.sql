@@ -1,6 +1,4 @@
-DROP TABLE IF EXISTS certificate_tag;
-DROP TABLE IF EXISTS gift_certificate;
-DROP TABLE IF EXISTS tag;
+
 
 CREATE TABLE gift_certificate
 (
@@ -18,7 +16,6 @@ CREATE TABLE tag
 (
     id   int NOT NULL AUTO_INCREMENT PRIMARY KEY,
     name varchar(45) DEFAULT NULL
-
 );
 
 
@@ -30,3 +27,21 @@ CREATE TABLE certificate_tag
     CONSTRAINT FK_gift_serticiates FOREIGN KEY (certificate_id) REFERENCES gift_certificate (id),
     CONSTRAINT FK_tags FOREIGN KEY (tag_id) REFERENCES tag (id)
 );
+
+CREATE TABLE user
+(
+    id int NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_name varchar(45) NOT NULL
+);
+
+CREATE TABLE orders
+(
+    id int NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    gift_id         int NOT NULL,
+    user_id int NOT NULL,
+    time_stamp varchar(45),
+    cost double,
+    CONSTRAINT FK_user FOREIGN KEY (user_id) REFERENCES user (id),
+    CONSTRAINT FK_gifts FOREIGN KEY (gift_id) REFERENCES gift_certificate (id)
+);
+

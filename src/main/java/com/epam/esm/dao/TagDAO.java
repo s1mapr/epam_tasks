@@ -6,15 +6,14 @@ import java.util.List;
 import java.util.Optional;
 
 public interface TagDAO {
-    List<Tag> getAllTags();
+    List<Tag> getAllTagsWithPagination(Integer page);
 
     Optional<Tag> getTagByName(String name);
 
-    void createTag(String name);
+    void createTag(Tag tag);
 
     void deleteTagById(int id);
 
-    List<Tag> getTagsByCertificateId(int id);
-
     Optional<Tag> getTagById(int id);
+
 }
