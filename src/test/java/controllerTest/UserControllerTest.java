@@ -1,14 +1,9 @@
 package controllerTest;
 
-import com.epam.esm.controller.TagController;
 import com.epam.esm.controller.UserController;
-import com.epam.esm.dto.GiftCertificateDTO;
 import com.epam.esm.dto.UserDTO;
 import com.epam.esm.entity.User;
-import com.epam.esm.service.OrderService;
 import com.epam.esm.service.UserService;
-import com.epam.esm.service.impl.TagGiftServiceImpl;
-import com.epam.esm.service.impl.TagServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,7 +21,6 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 

@@ -17,7 +17,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -57,7 +56,7 @@ public class TagControllerTest {
         Tag tag = new Tag();
         tag.setName("Test tag");
 
-        doNothing().when(tagServiceImpl).createTag(tag.getName());
+        when(tagServiceImpl.createTag(tag.getName())).thenReturn(1);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/tag")
                         .contentType(MediaType.APPLICATION_JSON)

@@ -1,30 +1,24 @@
 package serviceTest;
 
 import com.epam.esm.config.SpringConfig;
+import com.epam.esm.dto.OrderDTO;
 import com.epam.esm.entity.Order;
-import com.epam.esm.entity.Tag;
+import com.epam.esm.entity.User;
 import com.epam.esm.service.OrderService;
-import com.epam.esm.service.impl.OrderServiceImpl;
-import org.hibernate.SessionFactory;
+import com.epam.esm.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
-import org.springframework.orm.hibernate5.HibernateTransactionManager;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Optional;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -35,6 +29,9 @@ public class OrderServiceImplTest {
 
     @Autowired
     private OrderService orderService;
+
+    @Autowired
+    private UserService userService;
 
     @Autowired
     private DataSource dataSource;
@@ -59,4 +56,19 @@ public class OrderServiceImplTest {
         assertEquals(56.5, order.getCost());
     }
 
+    @Test
+    public void testGetAllUserOrdersDTO(){
+        int userId = 1;
+        User user = userService.getUserById(userId);
+        List<OrderDTO> orderList = orderService.getAllUserOrdersDTO(user, 1);
+        assertEquals(2, orderList.size());
+    }
+
+    @Test
+    public void testGetAllUserOrders(){
+        int userId = 1;
+        User user = userService.getUserById(userId);
+        List<Order> orders = orderService.getAllUserOrders(user);
+        assertEquals(2, orders.size());
+    }
 }

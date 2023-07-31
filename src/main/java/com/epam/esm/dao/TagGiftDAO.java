@@ -15,4 +15,8 @@ public interface TagGiftDAO {
     default List<TagGift> getAllEntries(){
         return null;
     }
+
+    default List<TagGift> getTagGiftByCertificateId(GiftCertificate giftCertificate){
+        return null;
+    }
 }

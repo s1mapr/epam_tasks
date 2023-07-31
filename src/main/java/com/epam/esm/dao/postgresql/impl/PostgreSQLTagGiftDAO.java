@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -50,13 +51,6 @@ public class PostgreSQLTagGiftDAO implements TagGiftDAO {
         deleteQuery.executeUpdate();
     }
 
-//    private Optional<TagGift> getEntry(int certificateId, int tagId){
-//        return jdbcTemplate.query(GET_ENTRY_BY_TAG_ID_AND_CERTIFICATE_ID,new BeanPropertyRowMapper<>(TagGift.class), certificateId, tagId).stream().findAny();
-//    }
-
-
-
-
     @Override
     public List<GiftCertificate> getGiftCertificatesByTagId(int id) {
         Session currentSession = entityManager.unwrap(Session.class);
@@ -65,5 +59,20 @@ public class PostgreSQLTagGiftDAO implements TagGiftDAO {
         return tagGifts.stream()
                 .map(TagGift::getGiftCertificate)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<TagGift> getAllEntries() {
+        Session currentSession = entityManager.unwrap(Session.class);
+        TypedQuery<TagGift> query = currentSession.createQuery("from TagGift ", TagGift.class);
+        return query.getResultList();
+    }
+
+    @Override
+    public List<TagGift> getTagGiftByCertificateId(GiftCertificate giftCertificate) {
+        Session currentSession = entityManager.unwrap(Session.class);
+        TypedQuery<TagGift> query = currentSession.createQuery("from TagGift tg WHERE tg.giftCertificate.id = :giftCertificateId");
+        query.setParameter("giftCertificateId", giftCertificate.getId());
+        return query.getResultList();
     }
 }

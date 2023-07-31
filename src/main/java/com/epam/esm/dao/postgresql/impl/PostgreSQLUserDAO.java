@@ -1,6 +1,7 @@
 package com.epam.esm.dao.postgresql.impl;
 
 import com.epam.esm.dao.UserDAO;
+import com.epam.esm.entity.Order;
 import com.epam.esm.entity.User;
 import com.epam.esm.exeptions.BadRequestException;
 import org.hibernate.Session;
@@ -8,9 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 public class PostgreSQLUserDAO implements UserDAO {
     private static final int LIMIT_FOR_PAGINATION = 10;
@@ -53,7 +52,26 @@ public class PostgreSQLUserDAO implements UserDAO {
     @Override
     public Optional<User> getUserWithHighestCostOfAllOrders() {
         Session currentSession = entityManager.unwrap(Session.class);
-        User user = currentSession.createQuery("SELECT o.user FROM Order o WHERE o.cost = (SELECT MAX(o2.cost) FROM Order o2)", User.class).getSingleResult();
-        return Optional.ofNullable(user);
+        List<Order> orders = currentSession.createQuery(" FROM Order", Order.class).getResultList();
+        Map<User, Double> usersWithCostOfOrders = new HashMap<>();
+
+        for (Order order : orders) {
+            User user = order.getUser();
+            usersWithCostOfOrders.put(user, usersWithCostOfOrders.getOrDefault(user, 0.0) + order.getCost());
+        }
+
+        User userWithHighestCostOfOrders = null;
+        double maxCount = 0;
+
+        for (Map.Entry<User, Double> entry : usersWithCostOfOrders.entrySet()) {
+            User user = entry.getKey();
+            double count = entry.getValue();
+
+            if (count > maxCount) {
+                maxCount = count;
+                userWithHighestCostOfOrders = user;
+            }
+        }
+        return Optional.ofNullable(userWithHighestCostOfOrders);
     }
 }

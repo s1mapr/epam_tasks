@@ -17,7 +17,7 @@ public class ControllerAdviceHandler {
      *
      * @param exception object of custom exception BadRequestException
      * @param request   object of HttpServletRequest
-     * @return gift certificate in JSON format
+     * @return message
      */
     @ExceptionHandler(value = BadRequestException.class)
     public ResponseEntity<MessageDTO> handleBadRequestException(BadRequestException exception, HttpServletRequest request) {

@@ -1,12 +1,9 @@
 package com.epam.esm.entity;
 
 import com.epam.esm.util.auditors.OrderAuditor;
-import com.epam.esm.util.auditors.UserAuditor;
 import lombok.*;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 
 @EntityListeners(OrderAuditor.class)
 @Entity

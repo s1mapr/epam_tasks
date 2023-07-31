@@ -1,8 +1,6 @@
 package com.epam.esm.util.auditors;
 
 import com.epam.esm.entity.Order;
-import com.epam.esm.entity.User;
-import org.aspectj.weaver.ast.Or;
 
 import javax.persistence.PrePersist;
 import javax.persistence.PreRemove;

@@ -52,9 +52,10 @@ public class PostgreSQLTagDAO implements TagDAO {
     }
 
     @Override
-    public void createTag(Tag tag) {
+    public int createTag(Tag tag) {
         Session currentSession = entityManager.unwrap(Session.class);
         currentSession.save(tag);
+        return tag.getId();
     }
 
     @Override

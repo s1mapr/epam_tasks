@@ -17,10 +17,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserDAO userDAO;
 
-    /**
-     * @param id
-     * @return
-     */
+
     @Override
     public UserDTO getUserDTOById(int id) {
         User user = userDAO.getUserById(id).orElseThrow(() -> new BadRequestException("User with id " + id + " not found"));
@@ -32,9 +29,7 @@ public class UserServiceImpl implements UserService {
         return userDAO.getUserById(id).orElseThrow(() -> new BadRequestException("User with id " + id + " not found"));
     }
 
-    /**
-     * @return
-     */
+
     @Override
     public List<UserDTO> getAllUsersWithPagination(Integer page) {
         List<User> list = userDAO.getAllUsersWithPagination(page);
@@ -43,17 +38,13 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * @return
-     */
+
     @Override
     public int createUser(User user) {
         return userDAO.createUser(user);
     }
 
-    /**
-     * @return
-     */
+
     @Override
     public User getUserWithHighestCostOfAllOrders() {
         return userDAO.getUserWithHighestCostOfAllOrders().orElseThrow(()->new BadRequestException("There are no any user"));

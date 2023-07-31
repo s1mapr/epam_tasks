@@ -2,12 +2,10 @@ package com.epam.esm.dto;
 
 
 import com.epam.esm.entity.Order;
-import com.epam.esm.entity.Tag;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.aspectj.weaver.ast.Or;
 import org.springframework.hateoas.RepresentationModel;
 
 @Getter

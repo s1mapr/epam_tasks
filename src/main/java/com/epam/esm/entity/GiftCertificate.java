@@ -1,9 +1,6 @@
 package com.epam.esm.entity;
 
 import com.epam.esm.util.auditors.GiftCertificateAuditor;
-import com.epam.esm.util.auditors.UserAuditor;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
 
 import javax.persistence.*;

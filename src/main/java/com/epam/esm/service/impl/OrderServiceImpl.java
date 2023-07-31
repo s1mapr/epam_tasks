@@ -27,9 +27,7 @@ public class OrderServiceImpl implements OrderService {
 
     private final GiftCertificateService giftCertificateService;
 
-    /**
-     * @return
-     */
+
     @Override
     @Transactional
     public int createOrder(Integer userId, Integer certificateId) {
@@ -38,11 +36,7 @@ public class OrderServiceImpl implements OrderService {
         return orderDAO.createOrder(user, giftCertificate);
     }
 
-    /**
-     * @param user
-     * @param page
-     * @return
-     */
+
     @Override
     public List<OrderDTO> getAllUserOrdersDTO(User user, Integer page) {
         return orderDAO.getAllUserOrders(user.getId(), page)
@@ -51,19 +45,13 @@ public class OrderServiceImpl implements OrderService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * @param orderId
-     * @return
-     */
+
     @Override
     public Order getOrderById(int orderId) {
         return orderDAO.getOrderById(orderId).orElseThrow(()->new BadRequestException("Order with id " + orderId + " not found"));
     }
 
-    /**
-     * @param user
-     * @return
-     */
+
     @Override
     public List<Order> getAllUserOrders(User user) {
         return user.getOrders();

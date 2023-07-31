@@ -10,7 +10,7 @@ public interface TagDAO {
 
     Optional<Tag> getTagByName(String name);
 
-    void createTag(Tag tag);
+    int createTag(Tag tag);
 
     void deleteTagById(int id);
 

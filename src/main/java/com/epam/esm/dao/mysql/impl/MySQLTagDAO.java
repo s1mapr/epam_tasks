@@ -2,7 +2,6 @@ package com.epam.esm.dao.mysql.impl;
 
 import com.epam.esm.dao.TagDAO;
 import com.epam.esm.entity.Tag;
-import com.epam.esm.entity.User;
 import com.epam.esm.exeptions.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Session;
@@ -54,9 +53,10 @@ public class MySQLTagDAO implements TagDAO {
     }
 
     @Override
-    public void createTag(Tag tag) {
+    public int createTag(Tag tag) {
         Session currentSession = entityManager.unwrap(Session.class);
         currentSession.save(tag);
+        return tag.getId();
     }
 
     @Override

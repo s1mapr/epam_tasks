@@ -9,16 +9,11 @@ import com.epam.esm.exeptions.BadRequestException;
 import com.epam.esm.service.TagService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
@@ -74,11 +69,17 @@ public class TagServiceImplTest {
     }
 
     @Test
-    public void testGetTagByName() {
+    public void testGetOptionalTagByName() {
         String tagName = "base";
         Optional<Tag> tag = service.getOptionalTagByName(tagName);
         assertTrue(tag.isPresent());
         assertEquals(tagName, tag.get().getName());
+    }
+    @Test
+    public void testGetTagByName() {
+        String tagName = "base";
+        TagDTO tag = service.getTagByName(tagName);
+        assertEquals(tagName, tag.getName());
     }
 
     @Test
@@ -88,4 +89,5 @@ public class TagServiceImplTest {
         assertNotNull(tag);
         assertEquals(tagId, tag.getId());
     }
+
 }

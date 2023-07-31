@@ -2,19 +2,15 @@ package serviceTest;
 
 import com.epam.esm.config.SpringConfig;
 import com.epam.esm.entity.GiftCertificate;
-import com.epam.esm.entity.TagGift;
 import com.epam.esm.exeptions.BadRequestException;
 import com.epam.esm.service.GiftCertificateService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
@@ -128,5 +124,11 @@ class GiftCertificateServiceImplTest {
         assertEquals(foundGiftCertificate.getDescription(), updatedGiftCertificate.getDescription());
         assertEquals(foundGiftCertificate.getPrice(), updatedGiftCertificate.getPrice());
         assertEquals(foundGiftCertificate.getDuration(), updatedGiftCertificate.getDuration());
+    }
+
+    @Test
+    public void testGetAllGiftCertificatesWithPagination(){
+        List<GiftCertificate> certificates = giftCertificateService.getAllGiftCertificatesWithPagination(1);
+        assertEquals(8, certificates.size());
     }
 }

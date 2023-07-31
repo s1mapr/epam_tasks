@@ -12,9 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -75,6 +73,14 @@ public class MySQLTagGiftDAO implements TagGiftDAO {
     public List<TagGift> getAllEntries() {
         Session currentSession = entityManager.unwrap(Session.class);
         TypedQuery<TagGift> query = currentSession.createQuery("from TagGift ", TagGift.class);
+        return query.getResultList();
+    }
+
+    @Override
+    public List<TagGift> getTagGiftByCertificateId(GiftCertificate giftCertificate) {
+        Session currentSession = entityManager.unwrap(Session.class);
+        TypedQuery<TagGift> query = currentSession.createQuery("from TagGift tg WHERE tg.giftCertificate.id = :giftCertificateId");
+        query.setParameter("giftCertificateId", giftCertificate.getId());
         return query.getResultList();
     }
 }

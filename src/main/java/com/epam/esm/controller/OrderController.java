@@ -1,5 +1,6 @@
 package com.epam.esm.controller;
 
+import com.epam.esm.dto.MessageDTO;
 import com.epam.esm.dto.OrderDTO;
 import com.epam.esm.entity.Order;
 import com.epam.esm.entity.User;
@@ -25,12 +26,28 @@ public class OrderController {
     private final OrderService orderService;
     private final UserService userService;
 
+    /**
+     * Method for creating order
+     * OrderDTO contains userId, certificateId, timestamp and price
+     *
+     * @param order order to create
+     */
     @PostMapping
-    public ResponseEntity<Void> createOrder(@RequestBody OrderDTO order) {
-        orderService.createOrder(order.getUserId(), order.getCertificateId());
-        return ResponseEntity.ok().build();
+    public ResponseEntity<MessageDTO> createOrder(@RequestBody OrderDTO order) {
+        int id = orderService.createOrder(order.getUserId(), order.getCertificateId());
+        return ResponseEntity.ok(MessageDTO.builder()
+                .status(HttpStatus.OK.value())
+                .message("Created order with id " + id)
+                .build());
     }
 
+    /**
+     * Method for getting order by id
+     *
+     * @param id is identifier of order
+     *
+     * @return order in JSON format
+     */
     @GetMapping("/{id}")
     public ResponseEntity<OrderDTO> getOrderById(@PathVariable("id") int id) {
         Order order = orderService.getOrderById(id);
@@ -39,6 +56,13 @@ public class OrderController {
         return new ResponseEntity<>(orderDTO, HttpStatus.OK);
     }
 
+    /**
+     * Method for getting user orders by user id
+     *
+     * @param id is identifier of user
+     *
+     * @return list of orders in JSON format
+     */
     @GetMapping("/userOrders/{id}")
     public ResponseEntity<List<OrderDTO>> getUserOrders(@PathVariable("id") int id,
                                                         @RequestParam(value = "p", required = false) Integer page){

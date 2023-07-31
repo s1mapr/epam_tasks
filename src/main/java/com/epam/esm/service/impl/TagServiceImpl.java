@@ -26,11 +26,11 @@ public class TagServiceImpl implements TagService {
     }
 
     @Transactional
-    public void createTag(String name) {
+    public int createTag(String name) {
         Tag tag = Tag.builder()
                 .name(name)
                 .build();
-        tagDAO.createTag(tag);
+        return tagDAO.createTag(tag);
     }
 
     @Transactional

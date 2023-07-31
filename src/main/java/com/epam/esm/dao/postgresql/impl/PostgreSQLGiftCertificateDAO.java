@@ -2,24 +2,15 @@ package com.epam.esm.dao.postgresql.impl;
 
 import com.epam.esm.dao.GiftCertificateDAO;
 import com.epam.esm.entity.GiftCertificate;
-import com.epam.esm.entity.Tag;
-import com.epam.esm.entity.User;
 import com.epam.esm.exeptions.BadRequestException;
 import com.epam.esm.util.ISO8601TimeFormatter;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.Session;
-import org.hibernate.proxy.HibernateProxy;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.Access;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
-import java.sql.PreparedStatement;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;

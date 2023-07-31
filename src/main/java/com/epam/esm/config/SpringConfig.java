@@ -4,8 +4,6 @@ package com.epam.esm.config;
 import com.epam.esm.dao.*;
 import com.epam.esm.dao.mysql.impl.*;
 import com.epam.esm.dao.postgresql.impl.*;
-import com.zaxxer.hikari.HikariDataSource;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.*;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;

@@ -22,7 +22,12 @@ public class UserController {
 
     private final UserService userService;
 
-
+    /**
+     * Method for getting all users that exist in DB
+     * If there are no any users, empty list will be returned
+     *
+     * @return all users in JSON format
+     */
     @GetMapping
     public ResponseEntity<List<UserDTO>> getAllUsers(@RequestParam(value = "p", required = false) Integer page) {
         List<UserDTO> userList = userService.getAllUsersWithPagination(page);
@@ -32,6 +37,13 @@ public class UserController {
         return new ResponseEntity<>(userList, HttpStatus.OK);
     }
 
+    /**
+     * Method for getting user by id
+     *
+     * @param id is identifier of user
+     *
+     * @return user in JSON format
+     */
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getUserById(@PathVariable("id") int id) {
         UserDTO user = userService.getUserDTOById(id);
@@ -40,6 +52,12 @@ public class UserController {
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
+    /**
+     * Method for puttin user in DB
+     * User contains userName
+     *
+     * @param user user to create
+     */
     @PostMapping
     public ResponseEntity<MessageDTO> createUser(@RequestBody User user) {
         int id = userService.createUser(user);

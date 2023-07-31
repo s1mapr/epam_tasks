@@ -6,3 +6,5 @@ INSERT INTO `tag` VALUES (4,'300$'),(5,'gift'),(6,'base'),(7,'newTest'),(8,'anot
 INSERT INTO `certificate_tag` VALUES (4,4),(5,5),(4,5),(5,4);
 
 INSERT INTO `user` VALUES (1, 'userName');
+
+INSERT INTO `orders` VALUES (1, 4, 1, '30.07.2023', 12.5), (2, 5, 1, '30.07.2023', 18.5);

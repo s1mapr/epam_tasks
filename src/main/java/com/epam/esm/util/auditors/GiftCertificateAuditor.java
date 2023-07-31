@@ -1,7 +1,6 @@
 package com.epam.esm.util.auditors;
 
 import com.epam.esm.entity.GiftCertificate;
-import com.epam.esm.entity.User;
 
 import javax.persistence.PrePersist;
 import javax.persistence.PreRemove;

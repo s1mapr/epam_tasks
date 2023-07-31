@@ -2,8 +2,6 @@ package com.epam.esm.entity;
 
 import com.epam.esm.dto.TagGiftId;
 import com.epam.esm.util.auditors.TagGiftCertificateAuditor;
-import com.epam.esm.util.auditors.UserAuditor;
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

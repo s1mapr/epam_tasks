@@ -2,7 +2,6 @@ package com.epam.esm.controller;
 
 import com.epam.esm.dto.MessageDTO;
 import com.epam.esm.dto.TagDTO;
-import com.epam.esm.dto.UserDTO;
 import com.epam.esm.entity.Order;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.entity.User;
@@ -17,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Objects;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -41,9 +39,12 @@ public class TagController {
      * @param tag certificate to create
      */
     @PostMapping
-    public ResponseEntity<Void> createTag(@RequestBody Tag tag) {
-        tagServiceImpl.createTag(tag.getName());
-        return ResponseEntity.ok().build();
+    public ResponseEntity<MessageDTO> createTag(@RequestBody Tag tag) {
+        int id = tagServiceImpl.createTag(tag.getName());
+        return ResponseEntity.ok(MessageDTO.builder()
+                .status(HttpStatus.OK.value())
+                .message("Created tag with id " + id)
+                .build());
     }
 
     /**
@@ -91,6 +92,11 @@ public class TagController {
         return new ResponseEntity<>(tag, HttpStatus.OK);
     }
 
+    /**
+     * Method for getting most wildly used tag
+     *
+     * @return most wildly used tag in JSON format
+     */
     @GetMapping("/mostWildlyUsedTag")
     public ResponseEntity<TagDTO> getMostWildlyUsedTagOfUserWithHighestCostOfAllOrders(){
         User user = userService.getUserWithHighestCostOfAllOrders();

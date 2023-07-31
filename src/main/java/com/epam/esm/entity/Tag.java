@@ -2,7 +2,6 @@ package com.epam.esm.entity;
 
 
 import com.epam.esm.util.auditors.TagAuditor;
-import com.epam.esm.util.auditors.UserAuditor;
 import lombok.*;
 
 import javax.persistence.*;

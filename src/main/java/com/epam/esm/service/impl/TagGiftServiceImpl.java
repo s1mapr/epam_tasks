@@ -123,7 +123,7 @@ public class TagGiftServiceImpl implements TagGiftService {
     }
     public List<TagDTO> getTagsByCertificateId(int id) {
         GiftCertificate certificate = giftCertificateServiceImpl.getGiftCertificateById(id);
-        List<TagGift> tagGifts = certificate.getGiftCertificateTags();
+        List<TagGift> tagGifts = tagGiftDAO.getTagGiftByCertificateId(certificate);
         return tagGifts.stream()
                 .map(TagGift::getTag)
                 .map(TagDTO::createDTO)

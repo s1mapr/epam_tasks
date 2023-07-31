@@ -1,10 +1,8 @@
 package com.epam.esm.dto;
 
-import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.User;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 import org.springframework.hateoas.RepresentationModel;
 
 @Getter
