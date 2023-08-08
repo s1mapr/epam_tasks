@@ -3,7 +3,7 @@ package com.epam.esm.entity;
 import com.epam.esm.util.auditors.GiftCertificateAuditor;
 import lombok.*;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,10 +32,8 @@ public class GiftCertificate {
     private String createDate;
     @Column
     private String lastUpdateDate;
-
     @OneToMany(mappedBy = "giftCertificate")
     private List<TagGift> giftCertificateTags = new ArrayList<>();
-
     @OneToMany(mappedBy = "giftCertificate")
     private List<Order> orders = new ArrayList<>();
 

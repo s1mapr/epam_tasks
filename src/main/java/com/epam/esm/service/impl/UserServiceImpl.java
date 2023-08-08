@@ -1,11 +1,13 @@
 package com.epam.esm.service.impl;
 
-import com.epam.esm.dao.UserDAO;
+import com.epam.esm.dao.UserRepository;
 import com.epam.esm.dto.UserDTO;
 import com.epam.esm.entity.User;
 import com.epam.esm.exeptions.BadRequestException;
+import com.epam.esm.service.OrderService;
 import com.epam.esm.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,24 +17,23 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    private final UserDAO userDAO;
-
-
+    private final UserRepository userRepository;
+    private final OrderService orderService;
     @Override
     public UserDTO getUserDTOById(int id) {
-        User user = userDAO.getUserById(id).orElseThrow(() -> new BadRequestException("User with id " + id + " not found"));
+        User user = userRepository.getUserById(id).orElseThrow(() -> new BadRequestException("User with id " + id + " not found"));
         return UserDTO.createDTO(user);
     }
 
     @Override
     public User getUserById(int id) {
-        return userDAO.getUserById(id).orElseThrow(() -> new BadRequestException("User with id " + id + " not found"));
+        return userRepository.getUserById(id).orElseThrow(() -> new BadRequestException("User with id " + id + " not found"));
     }
 
 
     @Override
     public List<UserDTO> getAllUsersWithPagination(Integer page) {
-        List<User> list = userDAO.getAllUsersWithPagination(page);
+        List<User> list = userRepository.findAll(PageRequest.of(page, 10)).getContent();
         return list.stream()
                 .map(UserDTO::createDTO)
                 .collect(Collectors.toList());
@@ -41,12 +42,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public int createUser(User user) {
-        return userDAO.createUser(user);
+        return userRepository.save(user).getId();
     }
 
-
-    @Override
-    public User getUserWithHighestCostOfAllOrders() {
-        return userDAO.getUserWithHighestCostOfAllOrders().orElseThrow(()->new BadRequestException("There are no any user"));
-    }
 }

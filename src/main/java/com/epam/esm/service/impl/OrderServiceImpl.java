@@ -1,18 +1,14 @@
 package com.epam.esm.service.impl;
 
-import com.epam.esm.dao.OrderDAO;
+import com.epam.esm.dao.OrderRepository;
 import com.epam.esm.dto.OrderDTO;
-import com.epam.esm.dto.UserDTO;
-import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Order;
 import com.epam.esm.entity.User;
 import com.epam.esm.exeptions.BadRequestException;
-import com.epam.esm.service.GiftCertificateService;
 import com.epam.esm.service.OrderService;
-import com.epam.esm.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,25 +17,17 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
 
-    private final OrderDAO orderDAO;
-
-    private final UserService userService;
-
-    private final GiftCertificateService giftCertificateService;
+    private final OrderRepository orderRepository;
 
 
     @Override
-    @Transactional
-    public int createOrder(Integer userId, Integer certificateId) {
-        User user = UserDTO.extractUserFromDTO(userService.getUserDTOById(userId));
-        GiftCertificate giftCertificate = giftCertificateService.getGiftCertificateById(certificateId);
-        return orderDAO.createOrder(user, giftCertificate);
+    public int saveOrder(Order order) {
+        return orderRepository.save(order).getId();
     }
-
 
     @Override
     public List<OrderDTO> getAllUserOrdersDTO(User user, Integer page) {
-        return orderDAO.getAllUserOrders(user.getId(), page)
+        return orderRepository.getOrdersByUserId(user.getId(), PageRequest.of(page, 10))
                 .stream()
                 .map(OrderDTO::createDTO)
                 .collect(Collectors.toList());
@@ -48,13 +36,22 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Order getOrderById(int orderId) {
-        return orderDAO.getOrderById(orderId).orElseThrow(()->new BadRequestException("Order with id " + orderId + " not found"));
+        return orderRepository.getOrderById(orderId).orElseThrow(()->new BadRequestException("Order with id " + orderId + " not found"));
     }
 
 
     @Override
     public List<Order> getAllUserOrders(User user) {
-        return user.getOrders();
+        return orderRepository.getOrdersByUserId(user.getId());
     }
 
+    @Override
+    public List<Order> getAllOrders(){
+        return orderRepository.findAll();
+    }
+
+    @Override
+    public void deleteOrderByGiftCertificateId(int giftCertificateId) {
+        orderRepository.deleteOrderByGiftCertificateId(giftCertificateId);
+    }
 }

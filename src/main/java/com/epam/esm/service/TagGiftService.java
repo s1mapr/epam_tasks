@@ -24,11 +24,8 @@ public interface TagGiftService {
 
     List<TagDTO> getTagsByCertificateId(int id);
 
-    List<GiftCertificate> getGiftCertificatesByTagId(int id);
     GiftCertificateDTO getCertificateDTOById(int id);
     List<GiftCertificateDTO> getAllGiftCertificateDTOWithPagination(Integer page);
     TagDTO getMostUsedTag(List<Order> orders);
-    default List<TagGift> getAllEntries(){
-        return null;
-    }
+
 }

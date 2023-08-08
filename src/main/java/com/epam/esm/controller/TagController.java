@@ -6,6 +6,7 @@ import com.epam.esm.entity.Order;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.entity.User;
 import com.epam.esm.service.OrderService;
+import com.epam.esm.service.UserOrderService;
 import com.epam.esm.service.UserService;
 import com.epam.esm.service.impl.TagGiftServiceImpl;
 import com.epam.esm.service.impl.TagServiceImpl;
@@ -26,12 +27,10 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class TagController {
 
     private final TagServiceImpl tagServiceImpl;
-
     private final TagGiftServiceImpl tagGiftService;
-
-    private final UserService userService;
-
     private final OrderService orderService;
+    private final UserOrderService userOrderService;
+
     /**
      * Method for creating tag
      * tagRequestDTO contains name, description, price, duration, create date and last update date
@@ -99,7 +98,7 @@ public class TagController {
      */
     @GetMapping("/mostWildlyUsedTag")
     public ResponseEntity<TagDTO> getMostWildlyUsedTagOfUserWithHighestCostOfAllOrders(){
-        User user = userService.getUserWithHighestCostOfAllOrders();
+        User user = userOrderService.getUserWithHighestCostOfAllOrders();
         List<Order> orders = orderService.getAllUserOrders(user);
         TagDTO mostWildlyUsedTag = tagGiftService.getMostUsedTag(orders);
         mostWildlyUsedTag.add(linkTo(methodOn(TagController.class).getMostWildlyUsedTagOfUserWithHighestCostOfAllOrders()).withSelfRel());

@@ -2,9 +2,9 @@ package com.epam.esm.entity;
 
 
 import com.epam.esm.util.auditors.TagAuditor;
+import jakarta.persistence.*;
 import lombok.*;
 
-import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 

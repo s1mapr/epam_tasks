@@ -1,13 +1,15 @@
 package com.epam.esm.service.impl;
 
-import com.epam.esm.dao.TagGiftDAO;
+import com.epam.esm.dao.TagGiftRepository;
 import com.epam.esm.dto.GiftCertificateDTO;
 import com.epam.esm.dto.TagDTO;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Order;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.entity.TagGift;
+import com.epam.esm.exeptions.BadRequestException;
 import com.epam.esm.service.GiftCertificateService;
+import com.epam.esm.service.OrderService;
 import com.epam.esm.service.TagGiftService;
 import com.epam.esm.service.TagService;
 import com.epam.esm.util.SearchFilter;
@@ -16,18 +18,17 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class TagGiftServiceImpl implements TagGiftService {
-    private final TagGiftDAO tagGiftDAO;
+    private final TagGiftRepository tagGiftRepository;
     private final TagService tagServiceImpl;
     private final GiftCertificateService giftCertificateServiceImpl;
+    private final OrderService orderService;
 
     @Transactional
     public int createGiftCertificate(GiftCertificateDTO giftCertificateDTO) {
@@ -69,15 +70,15 @@ public class TagGiftServiceImpl implements TagGiftService {
     private void addEntry(int tagId, int certificateId) {
         Tag tag = tagServiceImpl.getTagById(tagId);
         GiftCertificate giftCertificate = giftCertificateServiceImpl.getGiftCertificateById(certificateId);
-        tagGiftDAO.addEntry(tag, giftCertificate);
+        tagGiftRepository.save(new TagGift(giftCertificate, tag));
     }
 
     private void deleteEntryByTagId(int tagId){
-        tagGiftDAO.deleteEntryByTagId(tagId);
+        tagGiftRepository.deleteTagGiftByTagId(tagId);
     }
 
     private void deleteEntryByCertificateId(int certificateId){
-        tagGiftDAO.deleteEntryByCertificateId(certificateId);
+        tagGiftRepository.deleteTagGiftByGiftCertificateId(certificateId);
     }
 
     public List<GiftCertificateDTO> getAllGiftCertificateDTO() {
@@ -119,11 +120,12 @@ public class TagGiftServiceImpl implements TagGiftService {
     @Transactional
     public void deleteCertificateById(int certificateId){
         deleteEntryByCertificateId(certificateId);
+        orderService.deleteOrderByGiftCertificateId(certificateId);
         giftCertificateServiceImpl.deleteGiftCertificateById(certificateId);
     }
     public List<TagDTO> getTagsByCertificateId(int id) {
         GiftCertificate certificate = giftCertificateServiceImpl.getGiftCertificateById(id);
-        List<TagGift> tagGifts = tagGiftDAO.getTagGiftByCertificateId(certificate);
+        List<TagGift> tagGifts = tagGiftRepository.getTagGiftByGiftCertificateId(certificate.getId());
         return tagGifts.stream()
                 .map(TagGift::getTag)
                 .map(TagDTO::createDTO)
@@ -136,41 +138,27 @@ public class TagGiftServiceImpl implements TagGiftService {
     }
 
     public TagDTO getMostUsedTag(List<Order> orders) {
-        Map<Tag, Integer> tagCountMap = new HashMap<>();
 
-        for (Order order : orders) {
-            GiftCertificate giftCertificate = order.getGiftCertificate();
-            List<TagGift> giftCertificateTags = giftCertificate.getGiftCertificateTags();
+        Map<Tag, Integer> tagCountMap = orders.stream()
+                .map(Order::getGiftCertificate)
+                .flatMap(giftCertificate -> giftCertificate.getGiftCertificateTags().stream())
+                .map(TagGift::getTag)
+                .collect(Collectors.groupingBy(
+                        Function.identity(),
+                        Collectors.summingInt(tag -> 1)
+                ));
 
-            for (TagGift tagGift : giftCertificateTags) {
-                Tag tag = tagGift.getTag();
-                tagCountMap.put(tag, tagCountMap.getOrDefault(tag, 0) + 1);
-            }
+        Map.Entry<Tag, Integer> mostUsedTagEntry = tagCountMap.entrySet()
+                .stream()
+                .max(Map.Entry.comparingByValue())
+                .orElse(null);
+
+        if(Objects.isNull(mostUsedTagEntry)){
+            throw new BadRequestException("There are no user orders");
         }
 
-        Tag mostUsedTag = null;
-        int maxCount = 0;
-
-        for (Map.Entry<Tag, Integer> entry : tagCountMap.entrySet()) {
-            Tag tag = entry.getKey();
-            int count = entry.getValue();
-
-            if (count > maxCount) {
-                maxCount = count;
-                mostUsedTag = tag;
-            }
-        }
-
+        Tag mostUsedTag = mostUsedTagEntry.getKey();
         return TagDTO.createDTO(mostUsedTag);
     }
 
-    @Override
-    public List<GiftCertificate> getGiftCertificatesByTagId(int id) {
-        return tagGiftDAO.getGiftCertificatesByTagId(id);
-    }
-
-    @Override
-    public List<TagGift> getAllEntries() {
-        return tagGiftDAO.getAllEntries();
-    }
 }

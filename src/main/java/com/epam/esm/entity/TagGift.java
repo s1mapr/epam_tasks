@@ -2,12 +2,12 @@ package com.epam.esm.entity;
 
 import com.epam.esm.dto.TagGiftId;
 import com.epam.esm.util.auditors.TagGiftCertificateAuditor;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.*;
 
 @Getter
 @Setter

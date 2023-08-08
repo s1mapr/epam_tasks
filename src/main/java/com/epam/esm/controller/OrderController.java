@@ -5,6 +5,7 @@ import com.epam.esm.dto.OrderDTO;
 import com.epam.esm.entity.Order;
 import com.epam.esm.entity.User;
 import com.epam.esm.service.OrderService;
+import com.epam.esm.service.UserOrderService;
 import com.epam.esm.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -23,6 +24,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RequiredArgsConstructor
 public class OrderController {
 
+    private final UserOrderService userOrderService;
     private final OrderService orderService;
     private final UserService userService;
 
@@ -34,7 +36,7 @@ public class OrderController {
      */
     @PostMapping
     public ResponseEntity<MessageDTO> createOrder(@RequestBody OrderDTO order) {
-        int id = orderService.createOrder(order.getUserId(), order.getCertificateId());
+        int id = userOrderService.createOrder(order.getUserId(), order.getCertificateId());
         return ResponseEntity.ok(MessageDTO.builder()
                 .status(HttpStatus.OK.value())
                 .message("Created order with id " + id)
