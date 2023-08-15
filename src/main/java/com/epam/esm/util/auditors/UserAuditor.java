@@ -10,7 +10,7 @@ public class UserAuditor {
 
     @PrePersist
     private void prePersist(User user){
-        System.out.println("User with name " + user.getUserName() + " was created");
+        System.out.println("User with name " + user.getUsername() + " was created");
     }
 
     @PreUpdate

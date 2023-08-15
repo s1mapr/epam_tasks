@@ -10,11 +10,17 @@ import org.springframework.hateoas.RepresentationModel;
 public class UserDTO extends RepresentationModel<UserDTO> {
     private Integer id;
     private String userName;
+    private String password;
+    private int age;
+    private Role role;
 
     public static UserDTO createDTO(User user){
         return UserDTO.builder()
                 .id(user.getId())
-                .userName(user.getUserName())
+                .userName(user.getUsername())
+                .password(user.getPassword())
+                .age(user.getAge())
+                .role(user.getRole())
                 .build();
     }
 
@@ -22,6 +28,9 @@ public class UserDTO extends RepresentationModel<UserDTO> {
         return User.builder()
                 .id(userDTO.getId())
                 .userName(userDTO.userName)
+                .password(userDTO.getPassword())
+                .age(userDTO.getAge())
+                .role(userDTO.getRole())
                 .build();
     }
 }

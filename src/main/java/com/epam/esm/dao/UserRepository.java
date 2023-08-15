@@ -10,4 +10,5 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<User, Integer>, PagingAndSortingRepository<User, Integer> {
     Optional<User> getUserById(int id);
+    Optional<User> getUserByUserName(String userName);
 }

@@ -8,9 +8,14 @@ import com.epam.esm.service.OrderService;
 import com.epam.esm.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -18,7 +23,6 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final OrderService orderService;
     @Override
     public UserDTO getUserDTOById(int id) {
         User user = userRepository.getUserById(id).orElseThrow(() -> new BadRequestException("User with id " + id + " not found"));
@@ -44,5 +48,11 @@ public class UserServiceImpl implements UserService {
     public int createUser(User user) {
         return userRepository.save(user).getId();
     }
+
+    @Override
+    public User getUserByUserName(String userName) {
+        return userRepository.getUserByUserName(userName).orElseThrow(()->new BadRequestException("no user with such username"));
+    }
+
 
 }

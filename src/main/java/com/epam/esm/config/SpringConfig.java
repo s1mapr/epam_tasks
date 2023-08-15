@@ -2,21 +2,32 @@ package com.epam.esm.config;
 
 
 import com.epam.esm.dao.*;
-import com.epam.esm.dao.mysql.impl.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.*;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import javax.sql.DataSource;
 
 @Configuration
 @ComponentScan("com.epam.esm")
+@RequiredArgsConstructor
 @EnableWebMvc
 @PropertySources({
         @PropertySource("classpath:application.properties"),
         @PropertySource("classpath:application-${spring.profiles.active}.properties")})
 public class SpringConfig {
 
+    private final UserRepository repository;
 
     @Profile("test")
     @Bean
@@ -28,99 +39,29 @@ public class SpringConfig {
         dataSource.setPassword("");
         return dataSource;
     }
-//
-//
-//    @Profile("dev")
-//    @Bean(name = "tagDAO")
-//    public TagDAO mySQLTagDAO() {
-//        System.out.println("dev");
-//        return new MySQLTagDAO();
-//    }
-//
-//    @Profile("test")
-//    @Bean(name = "tagDAO")
-//    public TagDAO testMySQLTagDAO() {
-//        System.out.println("test");
-//        return new MySQLTagDAO();
-//    }
-//
-//    @Profile("prod")
-//    @Bean(name = "tagDAO")
-//    public TagDAO postgreSQLTagDAO() {
-//        System.out.println("prod");
-//        return new PostgreSQLTagDAO();
-//    }
-//
-//    @Profile("dev")
-//    @Bean(name = "giftCertificateDAO")
-//    public GiftCertificateDAO mySQLGiftCertificateDAO() {
-//        return new MySQLGiftCertificateDAO();
-//    }
-//
-//    @Profile("test")
-//    @Bean(name = "giftCertificateDAO")
-//    public GiftCertificateDAO testMySQLGiftCertificateDAO() {
-//        return new MySQLGiftCertificateDAO();
-//    }
-//
-//    @Profile("prod")
-//    @Bean(name = "giftCertificateDAO")
-//    public GiftCertificateDAO postrgreSQLGiftCertificateDAO() {
-//        return new PostgreSQLGiftCertificateDAO();
-//    }
-//
-//    @Profile("dev")
-//    @Bean("tagGiftDAO")
-//    public TagGiftDAO mySQLTagGiftDAO() {
-//        return new MySQLTagGiftDAO();
-//    }
-//
-//    @Profile("test")
-//    @Bean("tagGiftDAO")
-//    public TagGiftDAO testMySQLTagGiftDAO() {
-//        return new MySQLTagGiftDAO();
-//    }
-//
-//    @Profile("prod")
-//    @Bean("tagGiftDAO")
-//    public TagGiftDAO postgreSQLTagGiftDAO() {
-//        return new PostgreSQLTagGiftDAO();
-//    }
-//
-//    @Profile("dev")
-//    @Bean("userDAO")
-//    public UserDAO mySQLUserDAO() {
-//        return new MySQLUserDAO();
-//    }
-//
-//    @Profile("test")
-//    @Bean("userDAO")
-//    public UserDAO testMySQLUserDAO() {
-//        return new MySQLUserDAO();
-//    }
-//
-//    @Profile("prod")
-//    @Bean("userDAO")
-//    public UserDAO postgreSQLUserDAO() {
-//        return new PostgreSQLUserDAO();
-//    }
-//
-//    @Profile("dev")
-//    @Bean("orderDAO")
-//    public OrderDAO mySQLOrderDAO() {
-//        return new MySQLOrderDAO();
-//    }
-//
-//    @Profile("test")
-//    @Bean("orderDAO")
-//    public OrderDAO testMySQLOrderDAO() {
-//        return new MySQLOrderDAO();
-//    }
-//
-//    @Profile("prod")
-//    @Bean("orderDAO")
-//    public OrderDAO postgreSQLOrderDAO() {
-//        return new PostgreSQLOrderDAO();
-//    }
+
+    @Bean
+    public UserDetailsService userDetailsService() {
+        return username -> repository.getUserByUserName(username)
+                .orElseThrow(() -> new UsernameNotFoundException("user not found"));
+    }
+
+    @Bean
+    public AuthenticationProvider authenticationProvider(){
+        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
+        authenticationProvider.setUserDetailsService(userDetailsService());
+        authenticationProvider.setPasswordEncoder(passwordEncoder());
+        return authenticationProvider;
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+        return configuration.getAuthenticationManager();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
 }

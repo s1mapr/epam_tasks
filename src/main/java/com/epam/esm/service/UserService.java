@@ -13,4 +13,5 @@ public interface UserService {
     List<UserDTO> getAllUsersWithPagination(Integer page);
     int createUser(User user);
     User getUserById(int id);
+    User getUserByUserName(String userName);
 }
