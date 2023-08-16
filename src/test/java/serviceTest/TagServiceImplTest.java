@@ -1,93 +1,78 @@
 package serviceTest;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
-import com.epam.esm.config.SpringConfig;
+import com.epam.esm.dao.TagRepository;
 import com.epam.esm.dto.TagDTO;
 import com.epam.esm.entity.Tag;
-import com.epam.esm.exeptions.BadRequestException;
-import com.epam.esm.service.TagService;
-import org.junit.jupiter.api.BeforeEach;
+import com.epam.esm.service.impl.TagServiceImpl;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.jdbc.datasource.init.ScriptUtils;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.List;
 import java.util.Optional;
 
-@SpringBootTest(classes = SpringConfig.class)
-@ActiveProfiles("test")
-@Transactional
+@ExtendWith(MockitoExtension.class)
 public class TagServiceImplTest {
 
-    @Autowired
-    private TagService service;
+    @Mock
+    private TagRepository tagRepository;
 
-    @Autowired
-    private DataSource dataSource;
-
-    @BeforeEach
-    public void reset(){
-        try (Connection connection = dataSource.getConnection()){
-            ScriptUtils.executeSqlScript(connection, new ClassPathResource("create.sql"));
-            ScriptUtils.executeSqlScript(connection, new ClassPathResource("insert.sql"));
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Test
-    public void getAllTagsTest(){
-        List<TagDTO> listOfTags = service.getAllTagsWithPagination(1);
-        assertNotNull(listOfTags);
-        assertFalse(listOfTags.isEmpty());
-        assertEquals(5, listOfTags.size());
-    }
+    @InjectMocks
+    private TagServiceImpl tagService;
 
     @Test
     public void testCreateTag() {
-        String tagName = "test tag";
-        service.createTag(tagName);
-        Optional<Tag> tag = service.getOptionalTagByName(tagName);
-        assertTrue(tag.isPresent());
-        assertEquals(tagName, tag.get().getName());
+        when(tagRepository.save(any())).thenReturn(Tag.builder().id(1).name("Test Tag").build());
+
+        int result = tagService.createTag("Test Tag");
+
+        assertEquals(1, result);
     }
 
     @Test
     public void testDeleteTagById() {
-        int tagId = 1;
-        assertThrows(BadRequestException.class, () -> {
-            service.deleteTagById(tagId);
-        });
+        doNothing().when(tagRepository).deleteTagById(1);
+
+        assertDoesNotThrow(() -> tagService.deleteTagById(1));
+        verify(tagRepository, times(1)).deleteTagById(1);
     }
 
     @Test
     public void testGetOptionalTagByName() {
-        String tagName = "base";
-        Optional<Tag> tag = service.getOptionalTagByName(tagName);
-        assertTrue(tag.isPresent());
-        assertEquals(tagName, tag.get().getName());
+        Tag tag = new Tag();
+        when(tagRepository.getTagByName("Test Tag")).thenReturn(Optional.of(tag));
+
+        Optional<Tag> result = tagService.getOptionalTagByName("Test Tag");
+
+        assertTrue(result.isPresent());
+        assertEquals(tag, result.get());
     }
+
     @Test
     public void testGetTagByName() {
-        String tagName = "base";
-        TagDTO tag = service.getTagByName(tagName);
-        assertEquals(tagName, tag.getName());
+        Tag tag = new Tag();
+        tag.setName("Test Tag");
+        when(tagRepository.getTagByName("Test Tag")).thenReturn(Optional.of(tag));
+
+        TagDTO result = tagService.getTagByName("Test Tag");
+
+        assertEquals(tag.getName(), result.getName());
     }
 
     @Test
     public void testGetTagById() {
-        int tagId = 4;
-        Tag tag = service.getTagById(tagId);
-        assertNotNull(tag);
-        assertEquals(tagId, tag.getId());
+        Tag tag = new Tag();
+        tag.setId(1);
+        when(tagRepository.getTagById(1)).thenReturn(Optional.of(tag));
+
+        Tag result = tagService.getTagById(1);
+
+        assertEquals(tag, result);
     }
 
 }

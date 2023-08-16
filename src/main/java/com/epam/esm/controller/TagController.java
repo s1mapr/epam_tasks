@@ -7,7 +7,6 @@ import com.epam.esm.entity.Tag;
 import com.epam.esm.entity.User;
 import com.epam.esm.service.OrderService;
 import com.epam.esm.service.UserOrderService;
-import com.epam.esm.service.UserService;
 import com.epam.esm.service.impl.TagGiftServiceImpl;
 import com.epam.esm.service.impl.TagServiceImpl;
 import lombok.RequiredArgsConstructor;

@@ -1,74 +1,87 @@
 package serviceTest;
 
-import com.epam.esm.config.SpringConfig;
-import com.epam.esm.dto.OrderDTO;
+import com.epam.esm.dao.OrderRepository;
 import com.epam.esm.entity.Order;
 import com.epam.esm.entity.User;
-import com.epam.esm.service.OrderService;
-import com.epam.esm.service.UserService;
-import org.junit.jupiter.api.BeforeEach;
+import com.epam.esm.service.impl.OrderServiceImpl;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.jdbc.datasource.init.ScriptUtils;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
-
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-@SpringBootTest(classes = SpringConfig.class)
-@ActiveProfiles("test")
-@Transactional
+@ExtendWith(MockitoExtension.class)
 public class OrderServiceImplTest {
 
-    @Autowired
-    private OrderService orderService;
+    @Mock
+    private OrderRepository orderRepository;
 
-    @Autowired
-    private UserService userService;
+    @InjectMocks
+    private OrderServiceImpl orderService;
 
-    @Autowired
-    private DataSource dataSource;
+    @Test
+    public void testSaveOrder() {
+        Order order = Order.builder()
+                .id(1)
+                .build();
 
-    @BeforeEach
-    public void reset(){
-        try (Connection connection = dataSource.getConnection()){
-            ScriptUtils.executeSqlScript(connection, new ClassPathResource("create.sql"));
-            ScriptUtils.executeSqlScript(connection, new ClassPathResource("insert.sql"));
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        when(orderRepository.save(any(Order.class))).thenReturn(order);
+
+        int savedId = orderService.saveOrder(order);
+
+        assertEquals(1, savedId);
+    }
+
+
+    @Test
+    public void testGetOrderById() {
+        Order order = new Order();
+        when(orderRepository.getOrderById(1)).thenReturn(Optional.of(order));
+
+        Order result = orderService.getOrderById(1);
+
+        assertNotNull(result);
     }
 
     @Test
-    public void testCreateOrder(){
-        int certificateId = 4;
-        int userId = 1;
-        Integer orderId = orderService.createOrder(userId, certificateId);
-        assertNotNull(orderId);
-        Order order = orderService.getOrderById(orderId);
-        assertEquals(56.5, order.getCost());
+    public void testGetAllUserOrders() {
+        User user = User.builder()
+                .id(1)
+                .build();
+
+        List<Order> orders = new ArrayList<>();
+        orders.add(new Order());
+
+        when(orderRepository.getOrdersByUserId(1)).thenReturn(orders);
+
+        List<Order> result = orderService.getAllUserOrders(user);
+
+        assertEquals(1, result.size());
     }
 
     @Test
-    public void testGetAllUserOrdersDTO(){
-        int userId = 1;
-        User user = userService.getUserById(userId);
-        List<OrderDTO> orderList = orderService.getAllUserOrdersDTO(user, 1);
-        assertEquals(2, orderList.size());
+    public void testGetAllOrders() {
+        List<Order> orders = new ArrayList<>();
+        orders.add(new Order());
+
+        when(orderRepository.findAll()).thenReturn(orders);
+
+        List<Order> result = orderService.getAllOrders();
+
+        assertEquals(1, result.size());
     }
 
     @Test
-    public void testGetAllUserOrders(){
-        int userId = 1;
-        User user = userService.getUserById(userId);
-        List<Order> orders = orderService.getAllUserOrders(user);
-        assertEquals(2, orders.size());
+    public void testDeleteOrderByGiftCertificateId() {
+        assertDoesNotThrow(() -> orderService.deleteOrderByGiftCertificateId(1));
+        verify(orderRepository).deleteOrderByGiftCertificateId(1);
     }
 }

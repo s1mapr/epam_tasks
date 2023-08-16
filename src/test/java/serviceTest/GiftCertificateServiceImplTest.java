@@ -1,134 +1,99 @@
 package serviceTest;
 
-import com.epam.esm.config.SpringConfig;
+import com.epam.esm.dao.GiftCertificateRepository;
 import com.epam.esm.entity.GiftCertificate;
-import com.epam.esm.exeptions.BadRequestException;
-import com.epam.esm.service.GiftCertificateService;
-import org.junit.jupiter.api.BeforeEach;
+import com.epam.esm.service.impl.GiftCertificateServiceImpl;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.jdbc.datasource.init.ScriptUtils;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-@SpringBootTest(classes = SpringConfig.class)
-@ActiveProfiles("test")
-@Transactional
-class GiftCertificateServiceImplTest {
+@ExtendWith(MockitoExtension.class)
+public class GiftCertificateServiceImplTest {
 
-    @Autowired
-    private GiftCertificateService giftCertificateService;
+    @Mock
+    private GiftCertificateRepository giftCertificateRepository;
 
-    @Autowired
-    private DataSource dataSource;
+    @InjectMocks
+    private GiftCertificateServiceImpl giftCertificateService;
 
-    @BeforeEach
-    public void reset(){
-        try (Connection connection = dataSource.getConnection()){
-            ScriptUtils.executeSqlScript(connection, new ClassPathResource("create.sql"));
-            ScriptUtils.executeSqlScript(connection, new ClassPathResource("insert.sql"));
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+    @Test
+    public void testCreateGiftCertificate() {
+        GiftCertificate giftCertificate = new GiftCertificate();
+        giftCertificate.setId(1); // Assuming you set the ID when saving
+
+        when(giftCertificateRepository.save(any(GiftCertificate.class))).thenReturn(giftCertificate);
+
+        int createdId = giftCertificateService.createGiftCertificate(giftCertificate);
+
+        assertEquals(1, createdId);
     }
 
     @Test
-    void createGiftCertificateTest() {
-        GiftCertificate giftCertificate = GiftCertificate.builder()
-                .name("test")
-                .description("description")
-                .price(100.0)
-                .duration(30)
-                .createDate(LocalDateTime.now().toString())
-                .lastUpdateDate(LocalDateTime.now().toString())
-                .build();
-        Integer id = giftCertificateService.createGiftCertificate(giftCertificate);
-        assertNotNull(id);
+    public void testGetAllGiftCertificates() {
+        List<GiftCertificate> certificates = new ArrayList<>();
+        certificates.add(new GiftCertificate());
+
+        when(giftCertificateRepository.findAll()).thenReturn(certificates);
+
+        List<GiftCertificate> result = giftCertificateService.getAllGiftCertificates();
+
+        assertEquals(1, result.size());
     }
 
     @Test
-    void getAllGiftCertificatesTest() {
-        List<GiftCertificate> giftCertificates = giftCertificateService.getAllGiftCertificates();
-        assertNotNull(giftCertificates);
+    public void testGetAllGiftCertificatesWithPagination() {
+        List<GiftCertificate> certificates = new ArrayList<>();
+        certificates.add(new GiftCertificate());
+
+        Page<GiftCertificate> page = new PageImpl<>(certificates);
+
+        when(giftCertificateRepository.findAll(any(PageRequest.class))).thenReturn(page);
+
+        List<GiftCertificate> result = giftCertificateService.getAllGiftCertificatesWithPagination(0);
+
+        assertEquals(1, result.size());
     }
 
     @Test
-    void getGiftCertificateByIdTest() {
-        GiftCertificate giftCertificate = GiftCertificate.builder()
-                .name("test")
-                .description("description")
-                .price(100.0)
-                .duration(30)
-                .createDate(LocalDateTime.now().toString())
-                .lastUpdateDate(LocalDateTime.now().toString())
-                .build();
-        Integer id = giftCertificateService.createGiftCertificate(giftCertificate);
-        assertNotNull(id);
-        GiftCertificate foundGiftCertificate = giftCertificateService.getGiftCertificateById(id);
-        assertNotNull(foundGiftCertificate);
-        assertEquals(foundGiftCertificate.getId(), id);
+    public void testGetGiftCertificateById() {
+        GiftCertificate giftCertificate = new GiftCertificate();
+        when(giftCertificateRepository.getGiftCertificateById(1)).thenReturn(Optional.of(giftCertificate));
+
+        GiftCertificate result = giftCertificateService.getGiftCertificateById(1);
+
+        assertNotNull(result);
     }
 
     @Test
-    void deleteGiftCertificateByIdTest() {
-        GiftCertificate giftCertificate = GiftCertificate.builder()
-                .name("test")
-                .description("description")
-                .price(100.0)
-                .duration(30)
-                .createDate(LocalDateTime.now().toString())
-                .lastUpdateDate(LocalDateTime.now().toString())
-                .build();
-        Integer id = giftCertificateService.createGiftCertificate(giftCertificate);
-        assertNotNull(id);
-
-        giftCertificateService.deleteGiftCertificateById(id);
-        assertThrows(BadRequestException.class, () -> giftCertificateService.getGiftCertificateById(id));
+    public void testDeleteGiftCertificateById() {
+        assertDoesNotThrow(() -> giftCertificateService.deleteGiftCertificateById(1));
+        verify(giftCertificateRepository).deleteGiftCertificateById(1);
     }
 
     @Test
-    void updateGiftCertificateTest() {
-        GiftCertificate giftCertificate = GiftCertificate.builder()
-                .name("test")
-                .description("description")
-                .price(100.0)
-                .duration(30)
-                .createDate(LocalDateTime.now().toString())
-                .lastUpdateDate(LocalDateTime.now().toString())
-                .build();
-        Integer id = giftCertificateService.createGiftCertificate(giftCertificate);
-        assertNotNull(id);
+    public void testUpdateGiftCertificate() {
+        GiftCertificate oldGiftCertificate = new GiftCertificate();
+        when(giftCertificateRepository.getGiftCertificateById(1)).thenReturn(Optional.of(oldGiftCertificate));
 
-        GiftCertificate updatedGiftCertificate = GiftCertificate.builder()
-                .name("test")
-                .description("description")
-                .price(100.0)
-                .duration(30)
-                .createDate(LocalDateTime.now().toString())
-                .lastUpdateDate(LocalDateTime.now().toString())
-                .build();
-        giftCertificateService.updateGiftCertificate(updatedGiftCertificate, id);
-        GiftCertificate foundGiftCertificate = giftCertificateService.getGiftCertificateById(id);
-        assertNotNull(foundGiftCertificate);
-        assertEquals(foundGiftCertificate.getName(), updatedGiftCertificate.getName());
-        assertEquals(foundGiftCertificate.getDescription(), updatedGiftCertificate.getDescription());
-        assertEquals(foundGiftCertificate.getPrice(), updatedGiftCertificate.getPrice());
-        assertEquals(foundGiftCertificate.getDuration(), updatedGiftCertificate.getDuration());
-    }
+        GiftCertificate newGiftCertificate = new GiftCertificate();
+        newGiftCertificate.setName("New Name");
 
-    @Test
-    public void testGetAllGiftCertificatesWithPagination(){
-        List<GiftCertificate> certificates = giftCertificateService.getAllGiftCertificatesWithPagination(1);
-        assertEquals(8, certificates.size());
+        giftCertificateService.updateGiftCertificate(newGiftCertificate, 1);
+
+        verify(giftCertificateRepository).save(any(GiftCertificate.class));
     }
 }

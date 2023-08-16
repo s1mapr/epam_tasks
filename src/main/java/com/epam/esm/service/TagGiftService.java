@@ -3,9 +3,7 @@ package com.epam.esm.service;
 import com.epam.esm.dto.GiftCertificateDTO;
 import com.epam.esm.dto.SearchParams;
 import com.epam.esm.dto.TagDTO;
-import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Order;
-import com.epam.esm.entity.TagGift;
 
 import java.util.List;
 

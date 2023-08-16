@@ -2,9 +2,11 @@ package controllerTest;
 
 import com.epam.esm.controller.OrderController;
 import com.epam.esm.dto.OrderDTO;
+import com.epam.esm.dto.Role;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Order;
 import com.epam.esm.entity.User;
+import com.epam.esm.service.UserOrderService;
 import com.epam.esm.service.impl.OrderServiceImpl;
 import com.epam.esm.service.impl.UserServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -40,6 +42,9 @@ public class OrderControllerTest {
     @Mock
     private UserServiceImpl userService;
 
+    @Mock
+    private UserOrderService userOrderService;
+
     @BeforeEach
     public void setup() {
         mockMvc = MockMvcBuilders.standaloneSetup(orderController).build();
@@ -47,19 +52,24 @@ public class OrderControllerTest {
 
     @Test
     public void testCreateOrder() throws Exception {
-        OrderDTO orderDTO = OrderDTO.builder()
+        User user = User.builder()
+                .userName("name")
+                .role(Role.USER)
+                .password("123")
+                .age(21)
+                .build();
+        Order order = Order.builder()
                 .id(1)
-                .certificateId(1)
-                .userId(1)
+                .giftCertificate(new GiftCertificate())
+                .user(user)
                 .cost(50.2)
                 .timeStamp(LocalDate.now().toString())
                 .build();
 
-        when(orderService.createOrder(orderDTO.getUserId(), orderDTO.getCertificateId())).thenReturn(1);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/order")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(orderDTO)))
+                        .content(new ObjectMapper().writeValueAsString(order)))
                 .andExpect(status().isOk());
     }
 

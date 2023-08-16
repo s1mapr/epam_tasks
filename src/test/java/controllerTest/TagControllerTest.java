@@ -9,6 +9,7 @@ import com.epam.esm.service.OrderService;
 import com.epam.esm.service.UserService;
 import com.epam.esm.service.impl.TagGiftServiceImpl;
 import com.epam.esm.service.impl.TagServiceImpl;
+import com.epam.esm.service.impl.UserOrderServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,6 +43,9 @@ public class TagControllerTest {
     private OrderService orderService;
     @Mock
     private UserService userService;
+
+    @Mock
+    private UserOrderServiceImpl userOrderService;
 
     @InjectMocks
     private TagController tagController;
@@ -117,7 +121,7 @@ public class TagControllerTest {
 
         TagDTO testTag = TagDTO.builder().id(1).build();
 
-        when(userService.getUserWithHighestCostOfAllOrders()).thenReturn(testUser);
+        when(userOrderService.getUserWithHighestCostOfAllOrders()).thenReturn(testUser);
         when(orderService.getAllUserOrders(testUser)).thenReturn(testOrders);
         when(tagGiftService.getMostUsedTag(testOrders)).thenReturn(testTag);
 

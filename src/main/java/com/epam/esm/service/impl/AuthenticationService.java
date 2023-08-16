@@ -7,7 +7,6 @@ import com.epam.esm.security.AuthenticationRequest;
 import com.epam.esm.security.AuthenticationResponse;
 import com.epam.esm.security.JwtService;
 import com.epam.esm.security.RegisterRequest;
-import com.epam.esm.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

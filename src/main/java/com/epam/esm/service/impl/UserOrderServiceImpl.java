@@ -1,6 +1,5 @@
 package com.epam.esm.service.impl;
 
-import com.epam.esm.dao.OrderRepository;
 import com.epam.esm.dto.UserDTO;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Order;

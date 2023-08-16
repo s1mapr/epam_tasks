@@ -1,15 +1,10 @@
 package com.epam.esm.controller;
 
-import com.epam.esm.dto.MessageDTO;
 import com.epam.esm.dto.UserDTO;
-import com.epam.esm.entity.User;
 import com.epam.esm.service.UserService;
-import jakarta.annotation.security.RolesAllowed;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.annotation.Secured;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,7 +15,6 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RestController
 @RequestMapping("/user")
 @RequiredArgsConstructor
-@CrossOrigin
 public class UserController {
 
     private final UserService userService;
@@ -31,7 +25,6 @@ public class UserController {
      *
      * @return all users in JSON format
      */
-    @RolesAllowed("ADMIN")
     @GetMapping
     public ResponseEntity<List<UserDTO>> getAllUsers(@RequestParam(value = "p", required = false) Integer page) {
         List<UserDTO> userList = userService.getAllUsersWithPagination(page);
@@ -56,19 +49,4 @@ public class UserController {
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
-    /**
-     * Method for puttin user in DB
-     * User contains userName
-     *
-     * @param user user to create
-     */
-    @RolesAllowed("ADMIN")
-    @PostMapping
-    public ResponseEntity<MessageDTO> createUser(@RequestBody User user) {
-        int id = userService.createUser(user);
-        return ResponseEntity.ok(MessageDTO.builder()
-                .status(HttpStatus.OK.value())
-                .message("Created user with id " + id)
-                .build());
-    }
 }

@@ -2,9 +2,7 @@ package controllerTest;
 
 import com.epam.esm.controller.UserController;
 import com.epam.esm.dto.UserDTO;
-import com.epam.esm.entity.User;
 import com.epam.esm.service.UserService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,7 +18,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -68,18 +65,4 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.id").value(userId));
     }
 
-    @Test
-    public void testCreateUser() throws Exception{
-        User user = User.builder().id(1).build();
-
-        when(userService.createUser(any(User.class))).thenReturn(1);
-
-        mockMvc.perform(MockMvcRequestBuilders.post("/user")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(user)))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.message").value("Created user with id 1"))
-                .andReturn();
-    }
 }
