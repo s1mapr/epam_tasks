@@ -12,6 +12,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import static com.epam.esm.dto.Role.ADMIN;
 import static com.epam.esm.dto.Role.USER;
 
 @Configuration
@@ -32,9 +33,9 @@ public class SecurityConfiguration {
                 .permitAll()
                 .requestMatchers(HttpMethod.POST, "/auth/**")
                 .permitAll()
-                .requestMatchers(HttpMethod.GET, "/user/{id}").hasRole(USER.name())
-                .requestMatchers("/order/**").hasRole("USER")
-                .requestMatchers("/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/user/{id}").hasAnyRole(USER.name(), ADMIN.name())
+                .requestMatchers("/order/**").hasAnyRole(USER.name(), ADMIN.name())
+                .requestMatchers("/**").hasRole(ADMIN.name())
                 .and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
