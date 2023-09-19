@@ -3,7 +3,7 @@ package com.epam.esm.entity;
 import com.epam.esm.util.auditors.GiftCertificateAuditor;
 import lombok.*;
 
-import jakarta.persistence.*;
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
