@@ -3,6 +3,8 @@ package com.epam.esm.config;
 
 import com.epam.esm.dao.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.*;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,7 +25,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @PropertySources({
         @PropertySource("classpath:application.properties"),
         @PropertySource("classpath:application-${spring.profiles.active}.properties")})
-public class SpringConfig {
+public class SpringConfig  {
 
     private final UserRepository repository;
 
@@ -50,7 +52,6 @@ public class SpringConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
 
 
 }
