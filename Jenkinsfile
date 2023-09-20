@@ -10,11 +10,9 @@ pipeline{
             }
         }
         stage ('Sonar Scanner Coverage'){
-                    steps{
                         steps {
                             bat "mvn sonar:sonar"
                         }
-                    }
         }
         stage('Archive artifacts'){
             steps{
