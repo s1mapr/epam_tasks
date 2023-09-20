@@ -9,22 +9,16 @@ pipeline{
                 bat 'mvn clean package'
             }
         }
+        stage ('Sonar Scanner Coverage'){
+                    steps{
+                        steps {
+                            bat "mvn sonar:sonar"
+                        }
+                    }
+        }
         stage('Archive artifacts'){
             steps{
                 archiveArtifacts artifacts: 'target/*.war'
-            }
-        }
-        stage ('Jacoco Static Analysis'){
-            steps{
-                junit 'target/surefire-reports/**/*.xml'
-                jacoco()
-            }
-        }
-        stage ('Sonar Scanner Coverage'){
-            steps{
-                steps {
-                    bat "mvn sonar:sonar"
-                }
             }
         }
         stage ('Deploy to tomcat server'){
