@@ -21,7 +21,9 @@ pipeline{
             }
         }
         stage ('Sonar Scanner Coverage'){
-            bat "./mvn sonar:sonar -Dsonar.login=squ_72cab28ef47612d64dfdceb5e2190ea8af12f930 -Dsonar.host.url=http://localhost:9000"
+            steps{
+                bat "./mvn sonar:sonar -Dsonar.login=squ_72cab28ef47612d64dfdceb5e2190ea8af12f930 -Dsonar.host.url=http://localhost:9000"
+            }
         }
         stage ('Deploy to tomcat server'){
             steps{
