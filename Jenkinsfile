@@ -23,7 +23,7 @@ pipeline{
         stage ('Sonar Scanner Coverage'){
             steps{
                 steps {
-                    bat "mvn sonar:sonar
+                    bat "mvn sonar:sonar"
                 }
             }
         }
