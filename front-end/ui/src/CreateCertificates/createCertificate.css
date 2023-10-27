@@ -1,0 +1,140 @@
+#root {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: 'Open Sans', sans-serif;
+    height: 100vh;
+}
+
+.create-certificate-main {
+    width: 100%;
+    height: 93%;
+    padding-top: 52px;
+}
+
+.create-certificate-coupon-header {
+    width: 100%;
+    height: 10%;
+    background-color: rgb(187, 184, 184);
+    color: white;
+    display: flex;
+    align-items: center;
+}
+
+.create-certificate-coupon-header p {
+    margin-left: 180px;
+    font-size: 20px;
+    color: white;
+}
+
+.create-certificate-coupon-main {
+    height: 90%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: white;
+}
+
+.create-certificate-column {
+    display: flex;
+    flex-direction: column;
+    width: 30%;
+    height: 60%;
+}
+
+.create-certificate-data {
+    width: 90%;
+    height: 20%;
+}
+
+.create-certificate-data-desc {
+    width: fit-content;
+    height: fit-content;
+}
+
+
+.create-certificate-data input {
+    width: 98%;
+    height: 50%;
+    font-size: 16px;
+}
+
+.create-certificate-data select {
+    width: 100%;
+    height: 60%;
+    font-size: 16px;
+}
+
+textarea {
+    resize: none;
+    width: 100;
+    font-size: 16px;
+}
+
+.create-certificate-file-label {
+    display: inline-block;
+    cursor: pointer;
+    width: 95%;
+    height: 45%;
+}
+
+.create-certificate-file-container {
+    border: 1px solid #ccc;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 100%;
+}
+
+.create-certificate-file-icon {
+    font-size: 24px;
+    margin-right: 10px;
+}
+
+.create-certificate-file-text {
+    flex: 1;
+}
+
+.create-certificate-hidden-input {
+    display: none;
+}
+
+.create-certificate-buttons {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 48%;
+    margin-left: auto;
+    text-align: center;
+    margin-top: 15px;
+    margin-right: 10px;
+}
+
+.create-certificate-cancel-button {
+    border: 1px solid rgba(218, 218, 218, 0.9);
+    height: 37px;
+    width: 40%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+    color: black;
+}
+
+.create-certificate-submit {
+    font-family: 'Open Sans', sans-serif;
+    display: block;
+    height: 37px;
+    width: 60%;
+    border: none;
+    background-color: rgb(98, 230, 98);
+    color: white;
+    font-size: 16px;
+    margin-right: 35px;
+}
+
+label{
+    color: rgba(188, 187, 187, 0.9);
+}
