@@ -2,6 +2,7 @@ package com.epam.esm.controller;
 
 import com.epam.esm.dto.MessageDTO;
 import com.epam.esm.dto.OrderDTO;
+import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Order;
 import com.epam.esm.entity.User;
 import com.epam.esm.service.OrderService;
@@ -32,14 +33,12 @@ public class OrderController {
      * Method for creating order
      * OrderDTO contains userId, certificateId, timestamp and price
      *
-     * @param order order to create
      */
     @PostMapping
-    public ResponseEntity<MessageDTO> createOrder(@RequestBody OrderDTO order) {
-        int id = userOrderService.createOrder(order.getUserId(), order.getCertificateId());
+    public ResponseEntity<MessageDTO> createOrder(@RequestParam("userId") Integer userId, @RequestBody List<GiftCertificate> certificates) {
+     userOrderService.createOrders(userId, certificates);
         return ResponseEntity.ok(MessageDTO.builder()
                 .status(HttpStatus.OK.value())
-                .message("Created order with id " + id)
                 .build());
     }
 

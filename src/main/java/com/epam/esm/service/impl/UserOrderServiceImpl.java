@@ -4,7 +4,7 @@ import com.epam.esm.dto.UserDTO;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Order;
 import com.epam.esm.entity.User;
-import com.epam.esm.exeptions.BadRequestException;
+import com.epam.esm.exceptions.BadRequestException;
 import com.epam.esm.service.GiftCertificateService;
 import com.epam.esm.service.OrderService;
 import com.epam.esm.service.UserOrderService;
@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.cert.Certificate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -59,6 +60,18 @@ public class UserOrderServiceImpl implements UserOrderService {
                 .orElse(null);
 
         return  Optional.ofNullable(userWithHighestCostOfOrders).orElseThrow(()->new BadRequestException("There are no users in app"));
+    }
+
+    @Override
+    @Transactional
+    public void createOrders(Integer userId, List<GiftCertificate> certificates) {
+        new Thread(
+            ()->{
+                for(GiftCertificate certificate : certificates){
+                    createOrder(userId, certificate.getId());
+                }
+            }
+        ).start();
     }
 
 }

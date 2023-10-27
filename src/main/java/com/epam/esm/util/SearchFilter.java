@@ -3,7 +3,7 @@ package com.epam.esm.util;
 import com.epam.esm.dto.GiftCertificateDTO;
 import com.epam.esm.dto.SearchParams;
 import com.epam.esm.dto.TagDTO;
-import com.epam.esm.exeptions.BadRequestException;
+import com.epam.esm.exceptions.BadRequestException;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 

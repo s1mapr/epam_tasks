@@ -3,7 +3,7 @@ package com.epam.esm.service.impl;
 import com.epam.esm.dao.UserRepository;
 import com.epam.esm.dto.UserDTO;
 import com.epam.esm.entity.User;
-import com.epam.esm.exeptions.BadRequestException;
+import com.epam.esm.exceptions.BadRequestException;
 import com.epam.esm.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;

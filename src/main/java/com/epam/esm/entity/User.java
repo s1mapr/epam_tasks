@@ -15,6 +15,7 @@ import java.util.List;
 @Entity
 @Table
 @Getter
+@Setter
 @Builder
 @EntityListeners(UserAuditor.class)
 @NoArgsConstructor
@@ -29,7 +30,11 @@ public class User implements UserDetails {
     @Column
     private String password;
     @Column
-    private int age;
+    private String email;
+    @Column
+    private String address;
+    @Column
+    private String firstName;
     @Enumerated(EnumType.STRING)
     private Role role;
     @OneToMany(mappedBy = "user")

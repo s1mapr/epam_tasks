@@ -19,6 +19,7 @@ public class GiftCertificateDTO extends RepresentationModel<GiftCertificateDTO> 
     private int duration;
     private String createDate;
     private String lastUpdateDate;
+    private byte[] image;
     private List<TagDTO> tags;
 
     public static GiftCertificate extractGiftCertificateFromDTO(GiftCertificateDTO giftCertificateDTO){
@@ -27,6 +28,7 @@ public class GiftCertificateDTO extends RepresentationModel<GiftCertificateDTO> 
                 .description(giftCertificateDTO.getDescription())
                 .price(giftCertificateDTO.getPrice())
                 .duration(giftCertificateDTO.getDuration())
+                .image(giftCertificateDTO.getImage())
                 .build();
     }
 
@@ -39,6 +41,7 @@ public class GiftCertificateDTO extends RepresentationModel<GiftCertificateDTO> 
                 .duration(giftCertificate.getDuration())
                 .createDate(giftCertificate.getCreateDate())
                 .lastUpdateDate(giftCertificate.getLastUpdateDate())
+                .image(giftCertificate.getImage())
                 .build();
     }
 }

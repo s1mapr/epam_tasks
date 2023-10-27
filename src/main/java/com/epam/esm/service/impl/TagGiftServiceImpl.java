@@ -7,11 +7,12 @@ import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Order;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.entity.TagGift;
-import com.epam.esm.exeptions.BadRequestException;
+import com.epam.esm.exceptions.BadRequestException;
 import com.epam.esm.service.GiftCertificateService;
 import com.epam.esm.service.OrderService;
 import com.epam.esm.service.TagGiftService;
 import com.epam.esm.service.TagService;
+import com.epam.esm.util.ISO8601TimeFormatter;
 import com.epam.esm.util.SearchFilter;
 import com.epam.esm.dto.SearchParams;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +41,8 @@ public class TagGiftServiceImpl implements TagGiftService {
                     .forEach(tagServiceImpl::createTag);
 
         }
+        giftCertificate.setCreateDate(ISO8601TimeFormatter.getFormattedDate(new Date()));
+        giftCertificate.setLastUpdateDate(ISO8601TimeFormatter.getFormattedDate(new Date()));
         int id = giftCertificateServiceImpl.createGiftCertificate(giftCertificate);
         if (Objects.nonNull(giftCertificateDTO.getTags()) && !giftCertificateDTO.getTags().isEmpty()) {
             giftCertificateDTO.getTags().stream()

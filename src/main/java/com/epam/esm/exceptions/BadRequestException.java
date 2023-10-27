@@ -1,4 +1,4 @@
-package com.epam.esm.exeptions;
+package com.epam.esm.exceptions;
 
 public class BadRequestException extends RuntimeException{
     public BadRequestException(String errorMessage){

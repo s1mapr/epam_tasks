@@ -3,6 +3,8 @@ package com.epam.esm.controller;
 import com.epam.esm.dto.GiftCertificateDTO;
 import com.epam.esm.dto.MessageDTO;
 import com.epam.esm.dto.TagDTO;
+import com.epam.esm.entity.Tag;
+import com.epam.esm.service.impl.GiftCertificateServiceImpl;
 import com.epam.esm.service.impl.TagGiftServiceImpl;
 import com.epam.esm.dto.SearchParams;
 import com.epam.esm.service.impl.TagServiceImpl;
@@ -11,10 +13,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.io.IOException;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -23,10 +25,11 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(value = "/certificate", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/certificate")
 public class GiftCertificateController {
 
     private final TagGiftServiceImpl tagGiftServiceImpl;
+    private final GiftCertificateServiceImpl giftCertificateService;
     private final TagServiceImpl tagService;
 
     /**
@@ -36,25 +39,49 @@ public class GiftCertificateController {
      * @return list of all gift certificates in JSON format
      */
     @GetMapping
-    public ResponseEntity<List<GiftCertificateDTO>> getAllGiftCertificates(@RequestParam(value = "p", required = false) Integer page) {
+    public ResponseEntity<?> getAllGiftCertificates(@RequestParam(value = "p", required = false) Integer page) {
+        if(Objects.isNull(page)){
+            page = 1;
+        }
+        int pages = giftCertificateService.getAllGiftCertificates().size()/10+1;
         List<GiftCertificateDTO> certificates = tagGiftServiceImpl.getAllGiftCertificateDTOWithPagination(page);
         for (GiftCertificateDTO certificate : certificates) {
             certificate.add(linkTo(methodOn(GiftCertificateController.class).getCertificateById(certificate.getId())).withRel("certificate"));
             certificate.getTags().stream().map(x -> x.add(linkTo(methodOn(TagController.class).getTagById(x.getId())).withRel("tag"))).collect(Collectors.toList());
         }
-        return new ResponseEntity<>(certificates, HttpStatus.OK);
+        Map<String, Object> response = new HashMap<>();
+        response.put("certificates", certificates);
+        response.put("pages", pages);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     /**
      * Method for creating gift certificate
      * If there are no any gift certificates, empty list will be returned
      *
-     * @param giftCertificate contains name, description, price, duration, create date and last updaet date
      * @return message about request status
      */
-    @PostMapping
-    public ResponseEntity<MessageDTO> createGiftCertificate(@RequestBody GiftCertificateDTO giftCertificate) {
-        int id = tagGiftServiceImpl.createGiftCertificate(giftCertificate);
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<MessageDTO> createGiftCertificate(
+            @RequestParam("name") String name,
+            @RequestParam("description") String description,
+            @RequestParam("price") double price,
+            @RequestParam("duration") int duration,
+            @RequestParam("tags") String tag,
+            @RequestPart("image") MultipartFile image) {
+        int id = 0;
+        try {
+            id = tagGiftServiceImpl.createGiftCertificate(GiftCertificateDTO.builder()
+                            .name(name)
+                            .description(description)
+                            .price(price)
+                            .duration(duration)
+                            .tags(Collections.singletonList(TagDTO.builder().name(tag).build()))
+                            .image(image.getBytes())
+                    .build());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         return ResponseEntity.ok(MessageDTO.builder()
                 .status(HttpStatus.OK.value())
                 .message("Created gift certificate with id " + id)
@@ -78,13 +105,27 @@ public class GiftCertificateController {
      * Updates gift certificate by its identifier
      *
      * @param id              is identifier of certificate to update
-     * @param giftCertificate contains name, description, price, duration, create date, last update date, list of tags (All fields are optional)
      * @return message about request status
      */
     @PatchMapping("/{id}")
     public ResponseEntity<MessageDTO> updateGiftCertificateById(@PathVariable Integer id,
-                                                                @RequestBody GiftCertificateDTO giftCertificate) {
-        tagGiftServiceImpl.updateGiftCertificate(giftCertificate, id);
+                                                                @RequestParam("name") String name,
+                                                                @RequestParam("description") String description,
+                                                                @RequestParam("price") double price,
+                                                                @RequestParam("duration") int duration,
+                                                                @RequestParam("tags") String tag,
+                                                                @RequestPart("image") MultipartFile image) {
+        try {
+            tagGiftServiceImpl.updateGiftCertificate(GiftCertificateDTO.builder()
+                    .name(name)
+                    .description(description)
+                    .price(price)
+                    .duration(duration)
+                    .tags(Collections.singletonList(TagDTO.builder().name(tag).build()))
+                    .image(image.getBytes()).build(), id);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         return ResponseEntity.ok(MessageDTO.builder()
                 .status(HttpStatus.OK.value())
                 .message("Updated gift certificate with id " + id)
@@ -104,13 +145,17 @@ public class GiftCertificateController {
      * @return list of gift certificates in JSON format
      */
     @GetMapping("/search")
-    public ResponseEntity<List<GiftCertificateDTO>> getCertificatesByFilterParams(@RequestParam(value = "tagName", required = false) List<String> tagNames,
+    public ResponseEntity<?> getCertificatesByFilterParams(@RequestParam(value = "tagName", required = false) List<String> tagNames,
                                                                                   @RequestParam(value = "name", required = false) String name,
                                                                                   @RequestParam(value = "description", required = false) String description,
                                                                                   @RequestParam(value = "isSortByDate", required = false) boolean isSortByDate,
                                                                                   @RequestParam(value = "isSortByName", required = false) boolean isSortByName,
                                                                                   @RequestParam(value = "sortType", required = false) String sortType,
                                                                                   @RequestParam(value = "p", required = false) Integer page) {
+        if(Objects.isNull(page)){
+            page = 1;
+        }
+        int pages = giftCertificateService.getAllGiftCertificates().size()/10+1;
         List<TagDTO> tags = new ArrayList<>();
         if (Objects.nonNull(tagNames)) {
             tags = tagNames.stream().map(tagService::getTagByName).collect(Collectors.toList());
@@ -130,7 +175,10 @@ public class GiftCertificateController {
                 certificate.getTags().stream().map(x -> x.add(linkTo(methodOn(TagController.class).getTagById(x.getId())).withRel("tag"))).collect(Collectors.toList());
             }
         }
-        return new ResponseEntity<>(certificates, HttpStatus.OK);
+        Map<String, Object> response = new HashMap<>();
+        response.put("certificates", certificates);
+        response.put("pages", pages);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     /**

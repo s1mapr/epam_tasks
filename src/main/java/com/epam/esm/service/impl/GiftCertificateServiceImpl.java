@@ -2,13 +2,16 @@ package com.epam.esm.service.impl;
 
 import com.epam.esm.dao.GiftCertificateRepository;
 import com.epam.esm.entity.GiftCertificate;
-import com.epam.esm.exeptions.BadRequestException;
+import com.epam.esm.exceptions.BadRequestException;
 import com.epam.esm.service.GiftCertificateService;
+import com.epam.esm.util.ISO8601TimeFormatter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -28,7 +31,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
 
     @Override
     public List<GiftCertificate> getAllGiftCertificatesWithPagination(Integer page) {
-        return giftCertificateRepository.findAll(PageRequest.of(page, 10)).getContent();
+        return giftCertificateRepository.findAll(PageRequest.of(page-1, 10)).getContent();
     }
 
 
