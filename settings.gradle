@@ -1,0 +1,4 @@
+rootProject.name = 'GradlTask'
+include 'core'
+include 'api'
+
